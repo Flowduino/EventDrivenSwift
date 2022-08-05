@@ -1,0 +1,23 @@
+{
+  "pins" : [
+    {
+      "identity" : "observable",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Flowduino/Observable.git",
+      "state" : {
+        "revision" : "40f11bea890bf21428d3afd091aaa3347c167f1c",
+        "version" : "1.1.0"
+      }
+    },
+    {
+      "identity" : "threadsafeswift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Flowduino/ThreadSafeSwift.git",
+      "state" : {
+        "revision" : "1a25ee0eea2d74922f34da271347076772d42fc1",
+        "version" : "1.1.0"
+      }
+    }
+  ],
+  "version" : 2
+}
