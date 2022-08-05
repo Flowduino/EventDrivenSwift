@@ -16,6 +16,7 @@
     </a>
 </p>
 
+
 Decoupling of discrete units of code contributes massively to the long-term maintainability of your project(s). While *Observer Pattern* is a great way of providing some degree of decoupling by only requiring that *Observers* conform to a mutually-agreed *Interface* (Protocol, in Swift), we can go significantly further using an Event-Driven Pattern.
 
 With Event-Driven systems, there is absolutely *no* direct reference between discrete units of code. Instead, each discrete unit of code emits and listens for *Events* (as applicable). An *Event* is simply a structured object containing immutable information. Each unit of code can then operate based on the Event(s) it receives, and perform whatever operation(s) are necessary in the context of that particular unit of code.
@@ -75,7 +76,7 @@ Once an *Event* has been *Dispatched*, it cannot be cancelled or modified. This 
 ### `EventReceiver`
 An `EventReceiver` is a `class` inheriting the base type provided by this library called `EventReceiver`.
 
-Beneath the surface, `EventReceiver` is descends from `Thread`, and is literally what is known as a `Persistent Thread`.
+Beneath the surface, `EventReceiver` descends from `Thread`, and is literally what is known as a `Persistent Thread`.
 This means that the `Thread` would typically exist either for a long as your particular application would require it, or even for the entire lifetime of your application.
 
 Unlike most Threads, `EventReceiver` has been built specifically to operate with the lowest possible system resource footprint. When there are no *Events* waiting to be processed by your `EventReceiver`, the Thread will consume absolutely no CPU time, and effectively no power at all.
@@ -215,7 +216,7 @@ Firstly, `TemperatureProcessor` inherits from `EventReceiver`, which is where al
 
 The function `registerEventListeners` will be called automatically when an instance of `TemperatureProcessor` is created. Within this method, we cal `addEventCallback` to register `onTemperatureEvent` so that it will be invoked every time an *Event* of type `TemperatureEvent` is *Dispatched*.
 
-Our *Callback* (or *Handler* or *Listener Event*) is called `onTemperatureEvent`, and all this does is first check that the `event` received is of the type `TemperatureEvent`, and - if it is - passes the now-typed `TemperatureEvent` along to `processTemperatureEvent`, which is where we will implement whatever *Operation* is to be performed against a `TemperatureEvent.
+Our *Callback* (or *Handler* or *Listener Event*) is called `onTemperatureEvent`, and all this does is first check that the `event` received is of the type `TemperatureEvent`, and - if it is - passes the now-typed `TemperatureEvent` along to `processTemperatureEvent`, which is where we will implement whatever *Operation* is to be performed against a `TemperatureEvent`.
 
 **Note**: The need to provide type checking and casting (in `onTemperatureEvent`) is intended to be a temporary requirement. We are looking at ways to decorate this internally within the library, so that we can reduce the amount of boilerplate code you have to produce in your implementations.
 For the moment, this solution works well, and enables you to begin using `EventDrivenSwift` in your applications immediately.
@@ -258,7 +259,7 @@ Now, let's actually do something with our `TemperatureEvent` in the `processTemp
     }
 }
 ```
-The above code is intended to be illustrative, rather than *useful*. Our `processTemperatureEvent` passes *Event*'s the encapsulated `temperatureInCelsius` to a public variable (which could then be read by other code as necessary) as part of our `EventReceiver`, and also pre-calculates a `TemperatureRating` based on the Temperature value received in the *Event*.
+The above code is intended to be illustrative, rather than *useful*. Our `processTemperatureEvent` passes *Event*'s encapsulated `temperatureInCelsius` to a public variable (which could then be read by other code as necessary) as part of our `EventReceiver`, and also pre-calculates a `TemperatureRating` based on the Temperature value received in the *Event*.
 
 Ultimately, your code can do whatever you wish with the *Event*'s *Payload* data!
 
