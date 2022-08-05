@@ -11,7 +11,7 @@
     <a href="https://github.com/apple/swift-package-manager">
       <img src="https://img.shields.io/badge/spm-compatible-brightgreen.svg?style=flat" />
     </a>
-    <a href="https://discord.com/invite/GdZZKFTQ2A">
+    <a href="https://discord.gg/WXCcw532ne">
       <img src="https://img.shields.io/discord/878568176856731688?logo=Discord" />
     </a>
 </p>
@@ -356,5 +356,5 @@ Now that we've walked through these basic Usage Examples, see if you can produce
 
 ## Join us on Discord
 
-If you require additional support, or would like to discuss `EventDrivenSwift`, Swift, or any other topics related to Flowduino, you can [join us on Discord](https://discord.com/invite/GdZZKFTQ2A).
+If you require additional support, or would like to discuss `EventDrivenSwift`, Swift, or any other topics related to Flowduino, you can [join us on Discord](https://discord.gg/WXCcw532ne).
 
