@@ -19,19 +19,15 @@ final class BasicTests: XCTestCase {
         @ThreadSafeSemaphore var foo: Int = 0
         public var awaiter = DispatchSemaphore(value: 0)
         
-        internal func eventOneCallback(_ event: any Eventable, _ priority: EventPriority) {
-            if let eventOne = event as? TestEventTypeOne {
-                eventOneCallback(eventOne, priority)
-            }
-        }
-
         internal func eventOneCallback(_ event: TestEventTypeOne, _ priority: EventPriority) {
             foo = event.foo
             awaiter.signal()
         }
         
         override func registerEventListeners() {
-            addEventCallback(eventOneCallback, forEventType: TestEventTypeOne.self)
+            addEventCallback({ event, priority in
+                self.callTypedEventCallback(self.eventOneCallback, forEvent: event, priority: priority)
+            }, forEventType: TestEventTypeOne.self)
         }
     }
 

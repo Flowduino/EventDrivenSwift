@@ -193,35 +193,31 @@ So, we have an *Event* type, and we are able to *Dispatch* it through a *Queue* 
 class TemperatureProcessor: EventReceiver {
     /// Register our Event Listeners for this EventReceiver
     override func registerEventListeners() {
-        addEventCallback(onTemperatureEvent, forEventType: TemperatureEvent.self)
+        addEventCallback({ event, priority in
+            self.callTypedEventCallback(self.onTemperatureEvent, forEvent: event, priority: priority)
+        }, forEventType: TemperatureEvent.self)
     }
     
     /// Define our Callback Function to process received TemperatureEvent Events
-    func onTemperatureEvent(_ event: TestEventTypeOne, _ priority: EventPriority) {
-        /// At the moment, it is necessary to type check and cast the Event ourselves...
-        if let typedEvent = event as? TemperatureEvent { // If the Event conforms to TemperatureEvent...
-            processTemperatureEvent(typedEvent) // ... invoke our concrete method to process the Event data.
-        }
-    }
-    
-    /// Method to process our TemperatureEvent
-    func processTemperatureEvent(_ event: TemperatureEvent) {
-        
+    func onTemperatureEvent(_ event: TemperatureEvent, _ priority: EventPriority) {
+
     }
 }
 ```
-Before we dig into the implementation of `processTemperatureEvent`, which can basically do whatever we would want to do with the data provided in the `TemperatureEvent`, let's take a moment to understand what is happening in the above code.
+Before we dig into the implementation of `onTemperatureEvent`, which can basically do whatever we would want to do with the data provided in the `TemperatureEvent`, let's take a moment to understand what is happening in the above code.
 
 Firstly, `TemperatureProcessor` inherits from `EventReceiver`, which is where all of the magic happens to receive *Events* and register our *Listeners* (or *Callbacks* or *Handlers*).
 
 The function `registerEventListeners` will be called automatically when an instance of `TemperatureProcessor` is created. Within this method, we cal `addEventCallback` to register `onTemperatureEvent` so that it will be invoked every time an *Event* of type `TemperatureEvent` is *Dispatched*.
 
-Our *Callback* (or *Handler* or *Listener Event*) is called `onTemperatureEvent`, and all this does is first check that the `event` received is of the type `TemperatureEvent`, and - if it is - passes the now-typed `TemperatureEvent` along to `processTemperatureEvent`, which is where we will implement whatever *Operation* is to be performed against a `TemperatureEvent`.
+Notice that we use a *Closure* which invokes `self.callTypedEventCallback`. This is to address a fundamental limitation of Generics in the Swift language, and acts as a decorator to perform the Type Checking and Casting of the received `event` to the explicit *Event* type we expect. In this case, that is `TemperatureEvent`
+
+Our *Callback* (or *Handler* or *Listener Event*) is called `onTemperatureEvent`, which is where we will implement whatever *Operation* is to be performed against a `TemperatureEvent`.
 
 **Note**: The need to provide type checking and casting (in `onTemperatureEvent`) is intended to be a temporary requirement. We are looking at ways to decorate this internally within the library, so that we can reduce the amount of boilerplate code you have to produce in your implementations.
 For the moment, this solution works well, and enables you to begin using `EventDrivenSwift` in your applications immediately.
 
-Now, let's actually do something with our `TemperatureEvent` in the `processTemperatureEvent` method.
+Now, let's actually do something with our `TemperatureEvent` in the `onTemperatureEvent` method.
 ```swift
     /// An Enum to map a Temperature value onto a Rating
     enum TemperatureRating: String {
@@ -253,13 +249,13 @@ Now, let's actually do something with our `TemperatureEvent` in the `processTemp
     @ThreadSafeSemaphore public var temperatureInCelsius: Float = Float.zero
     @ThreadSafeSemaphore public var temperatureRating: TemperatureRating = .freezing
     
-    func processTemperatureEvent(_ event: TemperatureEvent) {
+    func onTemperatureEvent(_ event: TemperatureEvent, _ priority: EventPriority) {
         temperatureInCelsius = event.temperatureInCelsius
         temperatureRating = TemperatureRating.fromTemperature(event.temperatureInCelsius)
     }
 }
 ```
-The above code is intended to be illustrative, rather than *useful*. Our `processTemperatureEvent` passes *Event*'s encapsulated `temperatureInCelsius` to a public variable (which could then be read by other code as necessary) as part of our `EventReceiver`, and also pre-calculates a `TemperatureRating` based on the Temperature value received in the *Event*.
+The above code is intended to be illustrative, rather than *useful*. Our `onTemperatureEvent` passes *Event*'s encapsulated `temperatureInCelsius` to a public variable (which could then be read by other code as necessary) as part of our `EventReceiver`, and also pre-calculates a `TemperatureRating` based on the Temperature value received in the *Event*.
 
 Ultimately, your code can do whatever you wish with the *Event*'s *Payload* data!
 
@@ -304,9 +300,9 @@ protocol TemperatureProcessorObserver: AnyObject {
     func onTemperatureEvent(temperatureInCelsius: Float)
 }
 ```
-Now let's modify the `processTemperatureEvent` method we implemented in the previous example:
+Now let's modify the `onTemperatureEvent` method we implemented in the previous example:
 ```swift
-    func processTemperatureEvent(_ event: TemperatureEvent) {
+    func onTemperatureEvent(_ event: TemperatureEvent, _ priority: EventPriority) {
         temperatureInCelsius = event.temperatureInCelsius
         temperatureRating = TemperatureRating.fromTemperature(event.temperatureInCelsius)
         
@@ -332,9 +328,9 @@ enum TemperatureRatingEvent: Eventable {
     var temperatureRating: TemperatureRating
 }
 ```
-With the *Event* type defined, we can now once more expand our `processTemperatureEvent` to *Dispatch* our reciprocal `TemperatureRatingEvent`:
+With the *Event* type defined, we can now once more expand our `onTemperatureEvent` to *Dispatch* our reciprocal `TemperatureRatingEvent`:
 ```swift
-    func processTemperatureEvent(_ event: TemperatureEvent) {
+    func onTemperatureEvent(_ event: TemperatureEvent, _ priority: EventPriority) {
         temperatureInCelsius = event.temperatureInCelsius
         temperatureRating = TemperatureRating.fromTemperature(event.temperatureInCelsius)
         
