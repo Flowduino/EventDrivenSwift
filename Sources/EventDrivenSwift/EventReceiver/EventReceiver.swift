@@ -37,7 +37,7 @@ open class EventReceiver: EventHandler, EventReceivable {
      - Version: 1.0.0
      - Note: We use the Qualified Type Name as the Key because Types are not Hashable in Swift
      */
-    @ThreadSafeSemaphore private var eventCallbacks = [String:EventCallback]() //TODO: Make this a Revolving Door collection!
+    @ThreadSafeSemaphore private var eventCallbacks = [String:EventCallback]()
     
     /**
      Invoke the appropriate Callback for the given Event

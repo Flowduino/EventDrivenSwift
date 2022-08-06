@@ -107,7 +107,7 @@ open class EventHandler: ObservableThread, EventHandlable {
      - Parameters:
         - events: The `Array` of `Eventable` objects
      */
-    private func processEvents(_ events: [any Eventable], dispatchMethod: EventDispatchMethod, priority: EventPriority) {
+    @inline(__always) private func processEvents(_ events: [any Eventable], dispatchMethod: EventDispatchMethod, priority: EventPriority) {
         for event in events {
             processEvent(event, dispatchMethod: dispatchMethod, priority: priority)
         }
@@ -158,7 +158,7 @@ open class EventHandler: ObservableThread, EventHandlable {
      - Author: Simon J. Stuart
      - Version: 1.0.0
      */
-    internal func processAllEvents() {
+    @inline(__always) internal func processAllEvents() {
         processEventStacks() // we process Stacks first
         processEventQueues() // we process Queues next
     }
@@ -170,8 +170,8 @@ open class EventHandler: ObservableThread, EventHandlable {
      */
     public override func main() {
         while isExecuting {
-            eventsPending.wait()
-            processAllEvents()
+            eventsPending.wait() // This will make the Thread effectively "sleep" until there are Events pending
+            processAllEvents() // Once there's at least one Event waiting, we will Process it/them.
         }
     }
     

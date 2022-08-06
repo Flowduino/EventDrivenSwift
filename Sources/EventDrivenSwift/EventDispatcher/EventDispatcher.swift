@@ -26,7 +26,7 @@ open class EventDispatcher: EventHandler, EventDispatchable {
      - Author: Simon J. Stuart
      - Version: 1.0.0
      */
-    @ThreadSafeSemaphore private var listeners = [String:[ListenerContainer]]() //TODO: Make this a Revolving Door collection!
+    @ThreadSafeSemaphore private var listeners = [String:[ListenerContainer]]()
     
     public func addListener(_ listener: any EventReceivable, forEventType: Eventable.Type) {
         let eventTypeName = String(reflecting: forEventType)
@@ -83,32 +83,31 @@ open class EventDispatcher: EventHandler, EventDispatchable {
     override internal func processEvent(_ event: any Eventable, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
         let eventTypeName = String(reflecting: type(of: event))
         
+        var snapListeners = [String:[ListenerContainer]]()
+        
         _listeners.withLock { listeners in
-            let bucket = listeners[eventTypeName]
-            if bucket == nil { return } /// No Listeners, so nothing more to do!
-            
-            var newBucket: [ListenerContainer]? = nil
-            
-            for listener in bucket! {
-                if listener.listener == nil { /// If the Listener is `nil`...
-                    if newBucket != nil { continue } /// ...If we've already removed all `nil` values, move on
-                    ///... otherwise, remove the Listener from this bucket
-                    newBucket = bucket
-                    newBucket?.removeAll(where: { listenerContainer in
-                        listenerContainer.listener == nil
-                    })
-                    continue
-                }
-                
-                // so, we have a listener... let's deal with it!
-                switch dispatchMethod {
-                case .stack:
-                    listener.listener!.stackEvent(event, priority: priority)
-                case .queue:
-                    listener.listener!.queueEvent(event, priority: priority)
-                }
+            // We should take this opportunity to remove any nil listeners
+            listeners[eventTypeName]?.removeAll(where: { listenerContainer in
+                listenerContainer.listener == nil
+            })
+            snapListeners = listeners
+        }
+        
+        let bucket = snapListeners[eventTypeName]
+        if bucket == nil { return } /// No Listeners, so nothing more to do!
+        
+        for listener in bucket! {
+            if listener.listener == nil { /// If the Listener is `nil`...
+                continue
             }
-            if newBucket != nil { listeners[eventTypeName] = newBucket }
+            
+            // so, we have a listener... let's deal with it!
+            switch dispatchMethod {
+            case .stack:
+                listener.listener!.stackEvent(event, priority: priority)
+            case .queue:
+                listener.listener!.queueEvent(event, priority: priority)
+            }
         }
     }
 }

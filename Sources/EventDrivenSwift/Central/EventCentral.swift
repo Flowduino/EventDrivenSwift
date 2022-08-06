@@ -28,13 +28,13 @@ final public class EventCentral: EventDispatcher, EventCentralable {
      - Author: Simon J. Stuart
      - Version: 1.0.0
      */
-    public static var shared: EventDispatchable {
+    @inline(__always) public static var shared: EventDispatchable {
         get {
             return _shared
         }
     }
     
-    public static subscript() -> EventDispatchable {
+    @inline(__always) public static subscript() -> EventDispatchable {
         get {
             return _shared
         }
