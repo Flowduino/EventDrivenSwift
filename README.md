@@ -208,7 +208,7 @@ Before we dig into the implementation of `onTemperatureEvent`, which can basical
 
 Firstly, `TemperatureProcessor` inherits from `EventReceiver`, which is where all of the magic happens to receive *Events* and register our *Listeners* (or *Callbacks* or *Handlers*).
 
-The function `registerEventListeners` will be called automatically when an instance of `TemperatureProcessor` is created. Within this method, we cal `addEventCallback` to register `onTemperatureEvent` so that it will be invoked every time an *Event* of type `TemperatureEvent` is *Dispatched*.
+The function `registerEventListeners` will be called automatically when an instance of `TemperatureProcessor` is created. Within this method, we call `addEventCallback` to register `onTemperatureEvent` so that it will be invoked every time an *Event* of type `TemperatureEvent` is *Dispatched*.
 
 Notice that we use a *Closure* which invokes `self.callTypedEventCallback`. This is to address a fundamental limitation of Generics in the Swift language, and acts as a decorator to perform the Type Checking and Casting of the received `event` to the explicit *Event* type we expect. In this case, that is `TemperatureEvent`
 
