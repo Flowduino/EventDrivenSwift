@@ -52,7 +52,6 @@ final class BasicEventReceiverTests: XCTestCase {
         let eventThread = TestEventThread() // Create the Thread
         
         XCTAssertEqual(eventThread.foo, 0, "Expect initial value of eventThread.foo to be 0, but it's \(eventThread.foo)")
-        
         EventCentral.shared.queueEvent(testOne, priority: .normal) // Now let's dispatch our Event to change this value
         
         let result = eventThread.awaiter.wait(timeout: DispatchTime.now().advanced(by: DispatchTimeInterval.seconds(10)))
