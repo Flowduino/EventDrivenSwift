@@ -350,6 +350,13 @@ As you can see, we can create and *Dispatch* an *Event* in a single operation. T
 
 Now that we've walked through these basic Usage Examples, see if you can produce your own `EventReceiver` to process `TemperatureRatingEvent`s. Everything you need to achieve this has already been demonstrated in this document.
 
+## Features Coming Soon
+`EventDrivenSwift` is an evolving and ever-improving Library, so here is a list of the features you can expect in future releases:
+- **Event Pools** - A superset expanding upon a given `EventReceiver` descendant type to provide pooled processing based on given scaling rules and conditions.
+- **`UIEventReceiver`** - Will enable you to register Event Listener Callbacks to be executed on the UI Thread. This is required if you wish to use Event-Driven behaviour to directly update SwiftUI Views, for example.
+
+These are the features intended for the next Release, which will either be *1.1.0* or *2.0.0* depending on whether these additions require interface-breaking changes to the interfaces in version *1.0.0*.
+
 ## License
 
 `EventDrivenSwift` is available under the MIT license. See the [LICENSE file](./LICENSE) for more info.
