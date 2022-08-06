@@ -29,13 +29,13 @@ final public class EventCentral: EventDispatcher, EventCentralable {
      - Version: 1.0.0
      */
     @inline(__always) public static var shared: EventDispatchable {
-        get {
+        @inline(__always) get {
             return _shared
         }
     }
     
     @inline(__always) public static subscript() -> EventDispatchable {
-        get {
+        @inline(__always) get {
             return _shared
         }
     }
