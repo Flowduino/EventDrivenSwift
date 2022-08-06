@@ -10,7 +10,13 @@ import Foundation
 import ThreadSafeSwift
 import Observable
 
-public class EventDispatcher: EventHandler, EventDispatchable {   
+/**
+ An implementation of `EventHandler` designed to Queue/Stack outbound events, and Dispatch them to all registered `listeners`
+ - Author: Simon J. Stuart
+ - Version: 1.0.0
+ - Note: While you can inherit from and even create instances of `EventDispatcher`, best practice would be to use `EventCentral.shared` as the central Event Dispatcher.
+ */
+open class EventDispatcher: EventHandler, EventDispatchable {
     struct ListenerContainer {
         weak var listener: (any EventReceivable)?
     }

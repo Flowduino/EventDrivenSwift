@@ -10,6 +10,12 @@ import Foundation
 import ThreadSafeSwift
 import Observable
 
+/**
+ Abstract Base Type for all `EventHandler` Thread Types.
+ - Author: Simon J. Stuart
+ - Version: 1.0.0
+ - Note: This is the Common Base Type for `EventDispatcher` and `EventReceiver` base types
+ */
 open class EventHandler: ObservableThread, EventHandlable {
     /**
     A Map of `EventPriority` against an Array of `Eventable` in that corresponding Queue
@@ -37,25 +43,26 @@ open class EventHandler: ObservableThread, EventHandlable {
             var stackCount: Int = 0
             var queueCount: Int = 0
             
-            var snapStacks = [EventPriority:[any Eventable]]()
-            var snapQueues = [EventPriority:[any Eventable]]()
+            var snapStacks = [EventPriority:[any Eventable]]() // Snapshot of the current Stacks
+            var snapQueues = [EventPriority:[any Eventable]]() // Snapshot of hte current Queues
             
-            _stacks.withLock { stacks in
-                snapStacks = stacks
-            }
-            _queues.withLock { queues in
-                snapQueues = queues
-            }
+            _stacks.withLock { stacks in // With the Lock
+                snapStacks = stacks // Grab a Snapshot
+            } // Lock releases
             
-            for stack in snapStacks.values {
-                stackCount += stack.count
-            }
+            _queues.withLock { queues in // With the Lock
+                snapQueues = queues // Grab a Snapshot
+            } // Lock releases
             
-            for queue in snapQueues.values {
-                queueCount += queue.count
+            for stack in snapStacks.values { // Iterate Stacks
+                stackCount += stack.count // Increment Count
             }
             
-            return stackCount + queueCount
+            for queue in snapQueues.values { // Iterate Queues
+                queueCount += queue.count // Increment Count
+            }
+            
+            return stackCount + queueCount // Return the sum of Stack and Queue counts (total Event Count)
         }
     }
     
@@ -146,6 +153,11 @@ open class EventHandler: ObservableThread, EventHandlable {
         }
     }
     
+    /**
+     Simple Macro to process first the Stacks, then the Queues
+     - Author: Simon J. Stuart
+     - Version: 1.0.0
+     */
     internal func processAllEvents() {
         processEventStacks() // we process Stacks first
         processEventQueues() // we process Queues next
