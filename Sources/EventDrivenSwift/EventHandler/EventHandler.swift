@@ -177,10 +177,6 @@ open class EventHandler: ObservableThread, EventHandlable {
     
     override init() {
         super.init()
-        for priority in EventPriority.allCases {
-            queues[priority] = [any Eventable]()
-            stacks[priority] = [any Eventable]()
-        }
         start()
     }
 }
