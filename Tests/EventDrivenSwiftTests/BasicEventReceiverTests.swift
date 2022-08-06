@@ -1,5 +1,5 @@
 //
-// BasicTests.swift
+// BasicEventReceiverTests.swift
 // Copyright (c) 2022, Flowduino
 // Authored by Simon J. Stuart on 4th August 2022
 //
@@ -10,7 +10,7 @@ import XCTest
 import ThreadSafeSwift
 @testable import EventDrivenSwift
 
-final class BasicTests: XCTestCase {
+final class BasicEventReceiverTests: XCTestCase {
     struct TestEventTypeOne: Eventable {
         var foo: Int
     }
