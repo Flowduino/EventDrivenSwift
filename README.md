@@ -125,7 +125,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/Flowduino/EventDrivenSwift.git",
-            .upToNextMajor(from: "1.0.0")
+            .upToNextMajor(from: "1.1.0")
         ),
     ],
     //...
@@ -355,7 +355,7 @@ Now that we've walked through these basic Usage Examples, see if you can produce
 - **Event Pools** - A superset expanding upon a given `EventReceiver` descendant type to provide pooled processing based on given scaling rules and conditions.
 - **`UIEventReceiver`** - Will enable you to register Event Listener Callbacks to be executed on the UI Thread. This is required if you wish to use Event-Driven behaviour to directly update SwiftUI Views, for example.
 
-These are the features intended for the next Release, which will either be *1.1.0* or *2.0.0* depending on whether these additions require interface-breaking changes to the interfaces in version *1.0.0*.
+These are the features intended for the next Release, which will either be *1.2.0* or *2.0.0* depending on whether these additions require interface-breaking changes to the interfaces in version *1.1.0*.
 
 ## License
 

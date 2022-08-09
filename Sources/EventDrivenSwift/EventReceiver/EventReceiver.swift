@@ -120,7 +120,7 @@ open class EventReceiver: EventHandler, EventReceivable {
      - Author: Simon J. Stuart
      - Version: 1.0.0
      */
-    override init() {
+    public override init() {
         super.init()
         registerEventListeners()
     }

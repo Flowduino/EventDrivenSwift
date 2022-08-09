@@ -175,7 +175,7 @@ open class EventHandler: ObservableThread, EventHandlable {
         }
     }
     
-    override init() {
+    public override init() {
         super.init()
         start()
     }
