@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Flowduino/Observable.git",
       "state" : {
-        "revision" : "40f11bea890bf21428d3afd091aaa3347c167f1c",
-        "version" : "1.1.0"
+        "revision" : "d510e710900ea52bbfd9aa037addd708cbff526c",
+        "version" : "2.0.0"
       }
     },
     {
