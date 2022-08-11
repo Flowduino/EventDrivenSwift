@@ -16,6 +16,15 @@ import Foundation
  - Note: Your Event Handlers/Listeners/Callbacks will be executed on the UI Thread every time.
  */
 open class UIEventReceiver: EventReceiver, UIEventReceivable {
+    private static var _shared: UIEventReceivable? = nil
+    
+    public static var shared: UIEventReceivable {
+        get {
+            if _shared == nil { _shared = UIEventReceiver() }
+            return _shared!
+        }
+    }
+    
     override internal func callTypedEventCallback<TEvent: Eventable>(_ callback: @escaping TypedEventCallback<TEvent>, forEvent: Eventable, priority: EventPriority) {
         Task { /// Have to use a Task because this method is not `async`
             await MainActor.run { /// Forces the call to be invoked on the `MainActor` (UI Thread)

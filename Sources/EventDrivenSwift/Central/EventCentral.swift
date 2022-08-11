@@ -21,7 +21,7 @@ final public class EventCentral: EventDispatcher, EventCentralable {
      - Author: Simon J. Stuart
      - Version: 1.0.0
      */
-    private static var _shared: EventDispatchable = EventCentral()
+    private static var _shared: EventCentral = EventCentral()
     
     /**
      Returns the Central Event Dispatcher
@@ -40,19 +40,16 @@ final public class EventCentral: EventDispatcher, EventCentralable {
         }
     }
     
-    /// This just makes it so that your code cannot initialise instances of `EventCentral`. It's a Singleton!
-    override private init() {}
-    
-    @inline(__always) public static func addListener(_ listener: EventReceivable, forEventType: Eventable.Type) {
-        _shared.addListener(listener, forEventType: forEventType)
+    @inline(__always) public static func addReceiver(_ receiver: EventReceivable, forEventType: Eventable.Type) {
+        _shared.addReceiver(receiver, forEventType: forEventType)
     }
     
-    @inline(__always) public static func removeListener(_ listener: EventReceivable, forEventType: Eventable.Type) {
-        _shared.removeListener(listener, forEventType: forEventType)
+    @inline(__always) public static func removeReceiver(_ receiver: EventReceivable, forEventType: Eventable.Type) {
+        _shared.removeReceiver(receiver, forEventType: forEventType)
     }
     
-    @inline(__always) public static func removeListener(_ listener: EventReceivable) {
-        _shared.removeListener(listener)
+    @inline(__always) public static func removeReceiver(_ receiver: EventReceivable) {
+        _shared.removeReceiver(receiver)
     }
     
     @inline(__always) public static func queueEvent(_ event: Eventable, priority: EventPriority) {
@@ -68,4 +65,21 @@ final public class EventCentral: EventDispatcher, EventCentralable {
             return _shared.eventCount
         }
     }
+    
+    internal var eventListener = EventListener()
+    
+    @inline(__always) public static func addListener<TEvent>(_ requester: AnyObject, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type) -> UUID where TEvent : Eventable {
+        return _shared.eventListener.addListener(requester, callback, forEventType: forEventType)
+    }
+    
+    @inline(__always) public static func removeListener(_ token: UUID) {
+        _shared.eventListener.removeListener(token)
+    }
+    
+    @inline(__always) public static func removeListener(_ token: UUID, typeOf: Eventable.Type) {
+        _shared.eventListener.removeListener(token, typeOf: typeOf)
+    }
+    
+    /// This just makes it so that your code cannot initialise instances of `EventCentral`. It's a Singleton!
+    override private init() {}
 }
