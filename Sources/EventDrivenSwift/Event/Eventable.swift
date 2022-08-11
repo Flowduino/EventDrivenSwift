@@ -80,11 +80,11 @@ extension Eventable {
         EventCentral.stackEvent(self, priority: priority)
     }
     
-    @discardableResult static func addListener<TEvent: Eventable>(_ requester: AnyObject, _ callback: @escaping TypedEventCallback<TEvent>) -> UUID {
+    @discardableResult static public func addListener<TEvent: Eventable>(_ requester: AnyObject, _ callback: @escaping TypedEventCallback<TEvent>) -> UUID {
         return EventCentral.addListener(requester, callback, forEventType: Self.self)
     }
     
-    static func removeListener(_ token: UUID) {
+    public static func removeListener(_ token: UUID) {
         EventCentral.removeListener(token, typeOf: Self.self)
     }
 }
