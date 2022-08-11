@@ -125,7 +125,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/Flowduino/EventDrivenSwift.git",
-            .upToNextMajor(from: "1.1.0")
+            .upToNextMajor(from: "2.0.0")
         ),
     ],
     //...
@@ -189,13 +189,13 @@ Above would be with `.highest` *Priority*.
 ### Defining an `EventReceiver`
 So, we have an *Event* type, and we are able to *Dispatch* it through a *Queue* or a *Stack*, with whatever *Priority* we desire. Now we need to define an `EventReceiver` to listen for and process our `TemperatureEvent`s.
 
+**Note:** Code example in this section was updated for Version 2.0.0 due to considerable improvements, which necessitated changing the Interface slightly (for the better)
+
 ```swift
 class TemperatureProcessor: EventReceiver {
     /// Register our Event Listeners for this EventReceiver
     override func registerEventListeners() {
-        addEventCallback({ event, priority in
-            self.callTypedEventCallback(self.onTemperatureEvent, forEvent: event, priority: priority)
-        }, forEventType: TemperatureEvent.self)
+        addEventCallback(onTemperatureEvent, forEventType: TemperatureEvent.self)
     }
     
     /// Define our Callback Function to process received TemperatureEvent Events
@@ -210,12 +210,7 @@ Firstly, `TemperatureProcessor` inherits from `EventReceiver`, which is where al
 
 The function `registerEventListeners` will be called automatically when an instance of `TemperatureProcessor` is created. Within this method, we call `addEventCallback` to register `onTemperatureEvent` so that it will be invoked every time an *Event* of type `TemperatureEvent` is *Dispatched*.
 
-Notice that we use a *Closure* which invokes `self.callTypedEventCallback`. This is to address a fundamental limitation of Generics in the Swift language, and acts as a decorator to perform the Type Checking and Casting of the received `event` to the explicit *Event* type we expect. In this case, that is `TemperatureEvent`
-
 Our *Callback* (or *Handler* or *Listener Event*) is called `onTemperatureEvent`, which is where we will implement whatever *Operation* is to be performed against a `TemperatureEvent`.
-
-**Note**: The need to provide type checking and casting (in `onTemperatureEvent`) is intended to be a temporary requirement. We are looking at ways to decorate this internally within the library, so that we can reduce the amount of boilerplate code you have to produce in your implementations.
-For the moment, this solution works well, and enables you to begin using `EventDrivenSwift` in your applications immediately.
 
 Now, let's actually do something with our `TemperatureEvent` in the `onTemperatureEvent` method.
 ```swift
@@ -350,12 +345,14 @@ As you can see, we can create and *Dispatch* an *Event* in a single operation. T
 
 Now that we've walked through these basic Usage Examples, see if you can produce your own `EventReceiver` to process `TemperatureRatingEvent`s. Everything you need to achieve this has already been demonstrated in this document.
 
+## `UIEventReceiver`
+Version 2.0.0 introduces the `UIEventReceiver` base class, which operates exactly the same way as `EventReciever`, with the notable difference being that your registered *Event* Callbacks will **always** be invoked on the `MainActor` (or "UI Thread"). You can simply inherit from `UIEventReceiver` instead of `EventReceiver` whenever it is imperative for one or more *Event* Callbacks to execute on the `MainActor`.
+
 ## Features Coming Soon
 `EventDrivenSwift` is an evolving and ever-improving Library, so here is a list of the features you can expect in future releases:
 - **Event Pools** - A superset expanding upon a given `EventReceiver` descendant type to provide pooled processing based on given scaling rules and conditions.
-- **`UIEventReceiver`** - Will enable you to register Event Listener Callbacks to be executed on the UI Thread. This is required if you wish to use Event-Driven behaviour to directly update SwiftUI Views, for example.
 
-These are the features intended for the next Release, which will either be *1.2.0* or *2.0.0* depending on whether these additions require interface-breaking changes to the interfaces in version *1.1.0*.
+These are the features intended for the next Release, which will either be *2.1.0* or *3.0.0* depending on whether these additions require interface-breaking changes to the interfaces in version *2.0.0*.
 
 ## License
 

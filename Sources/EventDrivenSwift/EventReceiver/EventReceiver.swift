@@ -60,16 +60,18 @@ open class EventReceiver: EventHandler, EventReceivable {
     /**
      Registers an Event Callback for the given `Eventable` Type
      - Author: Simon J. Stuart
-     - Version: 1.0.0
+     - Version: 2.1.0
      - Parameters:
         - callback: The code to invoke for the given `Eventable` Type
         - forEventType: The `Eventable` Type for which to Register  the Callback
      */
-    internal func addEventCallback(_ callback: @escaping EventCallback, forEventType: Eventable.Type) {
+    internal func addEventCallback<TEvent: Eventable>(_ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type) {
         let eventTypeName = String(reflecting: forEventType)
         
         _eventCallbacks.withLock { eventCallbacks in
-            eventCallbacks[eventTypeName] = callback
+            eventCallbacks[eventTypeName] = { event, priority in
+                self.callTypedEventCallback(callback, forEvent: event, priority: priority)
+            }
         }
         
         /// We automatically register the Listener with the Central Event Dispatcher
@@ -79,7 +81,7 @@ open class EventReceiver: EventHandler, EventReceivable {
     /**
      Performs a Transparent Type Test, Type Cast, and Method Call via the `callback` Closure.
      - Author: Simon J. Stuart
-     - Version: 1.0.0
+     - Version: 2.1.0
      - Parameters:
         - callback: The code (Closure or Callback Method) to execute for the given `forEvent`, typed generically using `TEvent`
         - forEvent: The instance of the `Eventable` type to be processed
