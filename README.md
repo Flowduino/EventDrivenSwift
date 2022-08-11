@@ -125,7 +125,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/Flowduino/EventDrivenSwift.git",
-            .upToNextMajor(from: "2.0.0")
+            .upToNextMajor(from: "3.0.0")
         ),
     ],
     //...
@@ -346,13 +346,59 @@ As you can see, we can create and *Dispatch* an *Event* in a single operation. T
 Now that we've walked through these basic Usage Examples, see if you can produce your own `EventReceiver` to process `TemperatureRatingEvent`s. Everything you need to achieve this has already been demonstrated in this document.
 
 ## `UIEventReceiver`
-Version 2.0.0 introduces the `UIEventReceiver` base class, which operates exactly the same way as `EventReciever`, with the notable difference being that your registered *Event* Callbacks will **always** be invoked on the `MainActor` (or "UI Thread"). You can simply inherit from `UIEventReceiver` instead of `EventReceiver` whenever it is imperative for one or more *Event* Callbacks to execute on the `MainActor`.
+Version 2.0.0 introduced the `UIEventReceiver` base class, which operates exactly the same way as `EventReciever`, with the notable difference being that your registered *Event* Callbacks will **always** be invoked on the `MainActor` (or "UI Thread"). You can simply inherit from `UIEventReceiver` instead of `EventReceiver` whenever it is imperative for one or more *Event* Callbacks to execute on the `MainActor`.
+
+## `EventListener`
+Version 3.0.0 introduced the `EventListener` concept to the Library.
+
+An `EventListener` is a universal way of subscribing to *Events*, anywhere in your code!
+
+By design, `EventDrivenSwift` provides a *Central Event Listener*, which is automatically initialized should any of your code register a *Listener* for an *Event* by reference to the `Eventable` type.
+
+**Important Note:** `EventListener` will always invoke the associated `Callbacks` on the same Thread (or `DispatchQueue`) from whence the *Listener* registered! This is an extremely useful behaviour, because it means that *Listeners* registered from the `MainActor` (or "UI Thread") will always execute on that Thread, with no additional overhead or code required by you.
+
+Let's register a simple *Listener* in some arbitrary `class`. For this example, let's produce a hypothetical *View Model* that will *Listen* for `TemperatureRatingEvent`, and would invalidate an owning `View` to show the newly-received values.
+
+For the sake of this example, let's define this the pure SwiftUI way, *without* taking advantage of our `Observable` library: 
+```swift
+class TemperatureRatingViewModel: ObservableObject {
+    @Published var temperatureInCelsius: Float
+    @Published var temperatureRating: TemperatureRating
+    
+    var listenerToken: UUID
+    
+    internal func onTemperatureRatingEvent(_ event: TemperatureRatingEvent, _ priority: EventPriority) {
+        temperatureInCelsius = event.temperatureInCelsius
+        temperatureRating = event.temperatureRating
+    }
+    
+    init() {
+        // Let's register our Event Listener Callback!
+        listenerToken = TemperatureRatingEvent.addListener(self, onTemperatureRatingEvent)
+    }
+}
+```
+It really is **that** simple!
+
+We can use a direct reference to an `Eventable` type, and invoke the `addListener` method, automatically bound to all `Eventable` types, to register our *Listener*.
+
+In the above example, whenever the *Reciprocal Event* named `TemperatureRatingEvent` is dispatched, the `onTemperatureRatingEvent` method of any `TemperatureRatingViewModel` instance(s) will be invoked, in the context of that *Event*!
+
+Don't worry about managing the lifetime of your *Listener*! If the object which owns the *Listener* is destroyed, the *Listener* will be automatically unregistered for you!
+
+Another thing to note about the above example is the `listenerToken`. Whenever you register a *Listener*, it will return a Unique Universal ID (a `UUID`) value. You can use this value to *Unregister* your *Listener* at any time:
+```swift
+    TemperatureRatingEvent.removeListener(listenerToken)
+```
+This way, when an *Event* is no longer relevant to your code, you can simply call `removeListener` against the `Eventable` type, and pass in the token returned when you added the *Listener* in the first place.
+
+`EventListener`s are an extremely versatile and very powerful addition to `EventDrivenSwift`.
 
 ## Features Coming Soon
 `EventDrivenSwift` is an evolving and ever-improving Library, so here is a list of the features you can expect in future releases:
 - **Event Pools** - A superset expanding upon a given `EventReceiver` descendant type to provide pooled processing based on given scaling rules and conditions.
 
-These are the features intended for the next Release, which will either be *2.1.0* or *3.0.0* depending on whether these additions require interface-breaking changes to the interfaces in version *2.0.0*.
+These are the features intended for the next Release, which will either be *3.1.0* or *4.0.0* depending on whether these additions require interface-breaking changes to the interfaces in version *3.0.0*.
 
 ## License
 

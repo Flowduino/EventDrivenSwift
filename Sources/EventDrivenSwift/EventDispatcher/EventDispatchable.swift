@@ -15,23 +15,23 @@ import Foundation
  */
 public protocol EventDispatchable: EventHandlable {
     /**
-     Registers the given `listener` for the given `Eventable` Type
+     Registers the given `receiver` for the given `Eventable` Type
      - Author: Simon J. Stuart
      - Version: 1.0.0
      */
-    func addListener(_ listener: any EventReceivable, forEventType: Eventable.Type)
+    func addReceiver(_ receiver: any EventReceivable, forEventType: Eventable.Type)
     
     /**
-     Unregisters the given `listener` from the given `Eventable` Type
+     Unregisters the given `receiver` from the given `Eventable` Type
      - Author: Simon J. Stuart
      - Version: 1.0.0
      */
-    func removeListener(_ listener: any EventReceivable, forEventType: Eventable.Type)
+    func removeReceiver(_ receiver: any EventReceivable, forEventType: Eventable.Type)
     
     /**
-     Unregisters the given `listener` from all `Eventable` Types
+     Unregisters the given `receiver` from all `Eventable` Types
      - Author: Simon J. Stuart
      - Version: 1.0.0
      */
-    func removeListener(_ listener: any EventReceivable)
+    func removeReceiver(_ receiver: any EventReceivable)
 }

@@ -15,5 +15,4 @@ import Foundation
  - Note: Inherits from `EventReceivable`
  */
 public protocol UIEventReceivable: AnyObject, EventReceivable {
-
 }

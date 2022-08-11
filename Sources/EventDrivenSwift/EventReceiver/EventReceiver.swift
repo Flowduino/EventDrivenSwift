@@ -18,20 +18,6 @@ import Observable
  */
 open class EventReceiver: EventHandler, EventReceivable {
     /**
-     Convienience `typealias` used for Event Callbacks
-     - Author: Simon J. Stuart
-     - Version: 1.0.0
-     */
-    typealias EventCallback = (_ event: any Eventable, _ priority: EventPriority) -> ()
-    
-    /**
-     Convienience `typealias` used for Typed Event Callbacks
-     - Author: Simon J. Stuart
-     - Version: 1.0.0
-     */
-    typealias TypedEventCallback<TEvent: Any> = (_ event: TEvent, _ priority: EventPriority) -> ()
-    
-    /**
      Map of `Eventable` qualified Type Names against `EventCallback` methods.
      - Author: Simon J. Stuart
      - Version: 1.0.0
@@ -74,8 +60,8 @@ open class EventReceiver: EventHandler, EventReceivable {
             }
         }
         
-        /// We automatically register the Listener with the Central Event Dispatcher
-        EventCentral.shared.addListener(self, forEventType: forEventType)
+        /// We automatically register the Receiver with the Central Event Dispatcher
+        EventCentral.shared.addReceiver(self, forEventType: forEventType)
     }
     
     /**
@@ -109,7 +95,7 @@ open class EventReceiver: EventHandler, EventReceivable {
     }
     
     /**
-     Override this to register your Event Callbacks and Listeners
+     Override this to register your Event Listeners/Callbacks
      - Author: Simon J. Stuart
      - Version: 1.0.0
      */
@@ -118,7 +104,7 @@ open class EventReceiver: EventHandler, EventReceivable {
     }
     
     /**
-     Initializes an `EventReciever` decendant and invokes `registerEventListeners()` to register your Event Listeners within your `EventReceiver` type.
+     Initializes an `EventReciever` decendant and invokes `registerEventListeners()` to register your Event Listeners/Callbacks within your `EventReceiver` type.
      - Author: Simon J. Stuart
      - Version: 1.0.0
      */
