@@ -66,9 +66,15 @@ final public class EventCentral: EventDispatcher, EventCentralable {
         }
     }
     
-    internal var eventListener = EventListener()
+    private var _eventListener: EventListenable?
+    internal var eventListener: EventListenable {
+        get {
+            if _eventListener == nil { _eventListener = EventListener() }
+            return _eventListener!
+        }
+    }
     
-    @inline(__always) public static func addListener<TEvent>(_ requester: AnyObject, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type) -> UUID where TEvent : Eventable {
+    @discardableResult @inline(__always) public static func addListener<TEvent>(_ requester: AnyObject, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type) -> UUID where TEvent : Eventable {
         return _shared.eventListener.addListener(requester, callback, forEventType: forEventType)
     }
     

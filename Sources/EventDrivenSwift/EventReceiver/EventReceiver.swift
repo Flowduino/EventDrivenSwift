@@ -18,20 +18,6 @@ import Observable
  */
 open class EventReceiver: EventHandler, EventReceivable {
     /**
-     Convienience `typealias` used for Event Callbacks
-     - Author: Simon J. Stuart
-     - Version: 1.0.0
-     */
-    typealias EventCallback = (_ event: any Eventable, _ priority: EventPriority) -> ()
-    
-    /**
-     Convienience `typealias` used for Typed Event Callbacks
-     - Author: Simon J. Stuart
-     - Version: 1.0.0
-     */
-    typealias TypedEventCallback<TEvent: Any> = (_ event: TEvent, _ priority: EventPriority) -> ()
-    
-    /**
      Map of `Eventable` qualified Type Names against `EventCallback` methods.
      - Author: Simon J. Stuart
      - Version: 1.0.0

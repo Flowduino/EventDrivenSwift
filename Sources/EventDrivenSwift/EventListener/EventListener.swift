@@ -69,7 +69,7 @@ open class EventListener: EventHandler, EventListenable {
         }
     }
     
-    public func addListener<TEvent: Eventable>(_ requester: AnyObject, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type) -> UUID {
+    @discardableResult public func addListener<TEvent: Eventable>(_ requester: AnyObject, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type) -> UUID {
         let eventTypeName = String(reflecting: forEventType)
         let method: EventCallback = { event, priority in
             self.callTypedEventCallback(callback, forEvent: event, priority: priority)
@@ -144,14 +144,5 @@ open class EventListener: EventHandler, EventListenable {
         if let typedEvent = forEvent as? TEvent {
             callback(typedEvent, priority)
         }
-    }
-    
-    /**
-     Initializes an `EventListener`
-     - Author: Simon J. Stuart
-     - Version: 3.0.0
-     */
-    public override init() {
-        super.init()
     }
 }

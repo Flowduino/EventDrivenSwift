@@ -38,7 +38,7 @@ public protocol EventListenable: AnyObject, EventReceivable {
         - forEventType: The `Eventable` Type for which to Register  the Callback
      - Returns: A `UUID` value representing the `token` associated with this Event Callback
      */
-    func addListener<TEvent: Eventable>(_ requester: AnyObject, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type) -> UUID
+    @discardableResult func addListener<TEvent: Eventable>(_ requester: AnyObject, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type) -> UUID
     
     /**
      Locates and removes the given Listener `token` (if it exists)
