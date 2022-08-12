@@ -26,7 +26,7 @@ With Event-Driven systems, there is absolutely *no* direct reference between dis
 ## Decoupled Topology
 Where traditional software design principles would require communicating objects to reference each-other directly, Event-Driven design patterns eliminate the need for this.
 
-![Topological Diagram showing Event-Driven ViewModel being updated via Events from the Data Model Repository](/Diagrams/Event-Driven SwiftUI View.png?raw=true)
+<img src="/Diagrams/Event-Driven%20SwiftUI%20View.png?raw=true" alt="Topological Diagram showing Event-Driven ViewModel being updated via Events from the Data Model Repository" title="Topological Diagram showing Event-Driven ViewModel being updated via Events from the Data Model Repository">
 
 ## Terminology
 Understanding the Terminology used in this Library and its supporting examples/documentation will aid you considerably in immediately leveraging these tools to produce extremely powerful, high-performance, entirely-decoupled and easily maintained Event-Driven solutions.
