@@ -416,7 +416,7 @@ This way, when an *Event* is no longer relevant to your code, you can simply cal
 `EventDrivenSwift` is an evolving and ever-improving Library, so here is a list of the features you can expect in future releases:
 - **Event Pools** - A superset expanding upon a given `EventReceiver` descendant type to provide pooled processing based on given scaling rules and conditions.
 
-These are the features intended for the next Release, which will either be *3.1.0* or *4.0.0* depending on whether these additions require interface-breaking changes to the interfaces in version *3.0.0*.
+These are the features intended for the next Release, which will either be *3.2.0* or *4.0.0* depending on whether these additions require interface-breaking changes to the interfaces in version *3.1.0*.
 
 ## License
 
