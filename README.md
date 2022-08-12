@@ -23,6 +23,11 @@ With Event-Driven systems, there is absolutely *no* direct reference between dis
 
 *Event Driven Swift* is an extremely powerful library designed specifically to power your Event-Driven Applications in the Swift language.
 
+## Decoupled Topology
+Where traditional software design principles would require communicating objects to reference each-other directly, Event-Driven design patterns eliminate the need for this.
+
+![Topological Diagram showing Event-Driven ViewModel being updated via Events from the Data Model Repository](/Diagrams/Event-Driven SwiftUI View.png?raw=true)
+
 ## Terminology
 Understanding the Terminology used in this Library and its supporting examples/documentation will aid you considerably in immediately leveraging these tools to produce extremely powerful, high-performance, entirely-decoupled and easily maintained Event-Driven solutions.
 
