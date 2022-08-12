@@ -125,7 +125,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/Flowduino/EventDrivenSwift.git",
-            .upToNextMajor(from: "3.0.0")
+            .upToNextMajor(from: "3.1.0")
         ),
     ],
     //...
@@ -355,7 +355,7 @@ An `EventListener` is a universal way of subscribing to *Events*, anywhere in yo
 
 By design, `EventDrivenSwift` provides a *Central Event Listener*, which is automatically initialized should any of your code register a *Listener* for an *Event* by reference to the `Eventable` type.
 
-**Important Note:** `EventListener` will always invoke the associated `Callbacks` on the same Thread (or `DispatchQueue`) from whence the *Listener* registered! This is an extremely useful behaviour, because it means that *Listeners* registered from the `MainActor` (or "UI Thread") will always execute on that Thread, with no additional overhead or code required by you.
+**Important Note:** `EventListener` will (by default) invoke the associated `Callbacks` on the same Thread (or `DispatchQueue`) from whence the *Listener* registered! This is an extremely useful behaviour, because it means that *Listeners* registered from the `MainActor` (or "UI Thread") will always execute on that Thread, with no additional overhead or code required by you.
 
 Let's register a simple *Listener* in some arbitrary `class`. For this example, let's produce a hypothetical *View Model* that will *Listen* for `TemperatureRatingEvent`, and would invalidate an owning `View` to show the newly-received values.
 
@@ -385,6 +385,19 @@ We can use a direct reference to an `Eventable` type, and invoke the `addListene
 In the above example, whenever the *Reciprocal Event* named `TemperatureRatingEvent` is dispatched, the `onTemperatureRatingEvent` method of any `TemperatureRatingViewModel` instance(s) will be invoked, in the context of that *Event*!
 
 Don't worry about managing the lifetime of your *Listener*! If the object which owns the *Listener* is destroyed, the *Listener* will be automatically unregistered for you!
+
+If you need your *Event Callback* to execute on the *Listener's* Thread, as of Version 3.1.0... you can!
+```swift
+listenerToken = TemperatureRatingEvent.addListener(self, onTemperatureRatingEvent, executeOn: .listenerThread)
+```
+**Remember:** When executing an *Event Callback* on `.listenerThread`, you will need to ensure that your *Callback* and all resources that it uses are 100% Thread-Safe!
+**Important:** Executing the *Event Callback* on `.listnerThread` can potentially delay the invocation of other *Event Callbacks*. Only use this option when it is necessary.
+
+You can also execute your *Event Callback* on an ad-hoc `Task`:
+```swift
+listenerToken = TemperatureRatingEvent.addListener(self, onTemperatureRatingEvent, executeOn: .taskThread)
+```
+**Remember:** When executing an *Event Callback* on `.taskThread`, you will need to ensure that your *Callback* and all resources that it uses are 100% Thread-Safe!
 
 Another thing to note about the above example is the `listenerToken`. Whenever you register a *Listener*, it will return a Unique Universal ID (a `UUID`) value. You can use this value to *Unregister* your *Listener* at any time:
 ```swift

@@ -22,6 +22,28 @@ typealias EventCallback = (_ event: any Eventable, _ priority: EventPriority) ->
  */
 public typealias TypedEventCallback<TEvent: Any> = (_ event: TEvent, _ priority: EventPriority) -> ()
 
+public enum ExecuteEventOn {
+    /**
+     Callback will execute on the context of the Requester's own Thread
+     - Author: Simon J. Stuart
+     - Version: 3.1.0
+     */
+    case requesterThread
+    /**
+     Callback will execute on the context of the Listener's Thread
+     - Author: Simon J. Stuart
+     - Version: 3.1.0
+     - Note: You must ensure your Callback (and all resources it uses) are Thread-Safe!
+     */
+    case listenerThread
+    /**
+     Callback will execute on the context of an ad-hoc Task
+     - Author: Simon J. Stuart
+     - Version: 3.1.0
+     - Note: You must ensure your Callback (and all resources it uses) are Thread-Safe!
+     */
+    case taskThread
+}
 /**
  Provides a simple means of Receiving Events and invoking appropriate Callbacks
  - Author: Simon J. Stuart
@@ -36,9 +58,10 @@ public protocol EventListenable: AnyObject, EventReceivable {
         - requester: The Object owning the Callback Method
         - callback: The code to invoke for the given `Eventable` Type
         - forEventType: The `Eventable` Type for which to Register  the Callback
+        - executeOn: Tells the `EventListenable` whether to execute the Callback on the `requester`'s Thread, or the Listener's.
      - Returns: A `UUID` value representing the `token` associated with this Event Callback
      */
-    @discardableResult func addListener<TEvent: Eventable>(_ requester: AnyObject, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type) -> UUID
+    @discardableResult func addListener<TEvent: Eventable>(_ requester: AnyObject, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn) -> UUID
     
     /**
      Locates and removes the given Listener `token` (if it exists)
