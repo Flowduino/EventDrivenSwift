@@ -55,7 +55,7 @@ open class EventListener: EventHandler, EventListenable {
             listeners = eventListeners[eventTypeName]
         }
 
-        if listeners == nil { return } // If there is no Callback, we will just return!
+        if listeners == nil { return } // If there are no Listeners, we will just return!
 
         for listener in listeners! {
             if listener.requester == nil { // If the Requester no longer exists...
@@ -64,9 +64,11 @@ open class EventListener: EventHandler, EventListenable {
             }
             switch listener.executeOn {
             case .requesterThread:
-                let dispatchQueue = listener.dispatchQueue ?? DispatchQueue.main
-                dispatchQueue.async {
-                    listener.callback(event, priority)
+                Task { // We raise a Task because we don't want the entire Listener blocked in the event the dispatchQueue is busy or blocked!
+                    let dispatchQueue = listener.dispatchQueue ?? DispatchQueue.main
+                    dispatchQueue.async {
+                        listener.callback(event, priority)
+                    }
                 }
             case .listenerThread:
                 listener.callback(event, priority)
