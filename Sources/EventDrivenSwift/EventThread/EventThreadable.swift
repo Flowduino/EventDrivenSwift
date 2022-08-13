@@ -13,6 +13,6 @@ import Foundation
  - Author: Simon J. Stuart
  - Version: 3.1.0
  */
-public protocol EventThreadable: AnyObject, EventReceivable {
+public protocol EventThreadable: AnyObject, EventReceiving {
 
 }

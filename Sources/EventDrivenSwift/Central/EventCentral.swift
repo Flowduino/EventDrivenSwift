@@ -28,27 +28,27 @@ final public class EventCentral: EventDispatcher, EventCentralable {
      - Author: Simon J. Stuart
      - Version: 1.0.0
      */
-    @inline(__always) public static var shared: EventDispatchable {
+    @inline(__always) public static var shared: EventDispatching {
         @inline(__always) get {
             return _shared
         }
     }
     
-    @inline(__always) public static subscript() -> EventDispatchable {
+    @inline(__always) public static subscript() -> EventDispatching {
         @inline(__always) get {
             return _shared
         }
     }
     
-    @inline(__always) public static func addReceiver(_ receiver: EventReceivable, forEventType: Eventable.Type) {
+    @inline(__always) public static func addReceiver(_ receiver: EventReceiving, forEventType: Eventable.Type) {
         _shared.addReceiver(receiver, forEventType: forEventType)
     }
     
-    @inline(__always) public static func removeReceiver(_ receiver: EventReceivable, forEventType: Eventable.Type) {
+    @inline(__always) public static func removeReceiver(_ receiver: EventReceiving, forEventType: Eventable.Type) {
         _shared.removeReceiver(receiver, forEventType: forEventType)
     }
     
-    @inline(__always) public static func removeReceiver(_ receiver: EventReceivable) {
+    @inline(__always) public static func removeReceiver(_ receiver: EventReceiving) {
         _shared.removeReceiver(receiver)
     }
     

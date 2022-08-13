@@ -1,5 +1,5 @@
 //
-// EventReceivable.swift
+// EventReceiving.swift
 // Copyright (c) 2022, Flowduino
 // Authored by Simon J. Stuart on 4th August 2022
 //
@@ -13,6 +13,6 @@ import Foundation
  - Author: Simon J. Stuart
  - Version: 1.0.0
  */
-public protocol EventReceivable: AnyObject, EventHandlable {
+public protocol EventReceiving: AnyObject, EventHandling {
 
 }

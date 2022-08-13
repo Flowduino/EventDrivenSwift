@@ -49,7 +49,7 @@ public enum ExecuteEventOn {
  - Author: Simon J. Stuart
  - Version: 3.0.0
  */
-public protocol EventListenable: AnyObject, EventReceivable {
+public protocol EventListenable: AnyObject, EventReceiving {
     /**
      Registers an Event Callback for the given `Eventable` Type
      - Author: Simon J. Stuart

@@ -14,21 +14,21 @@ public protocol EventCentralable {
      - Author: Simon J. Stuart
      - Version: 1.0.0
      */
-    static func addReceiver(_ receiver: any EventReceivable, forEventType: Eventable.Type)
+    static func addReceiver(_ receiver: any EventReceiving, forEventType: Eventable.Type)
     
     /**
      Unregisters the given `receiver` from the given `Eventable` Type for the Central Event Dispatcher
      - Author: Simon J. Stuart
      - Version: 1.0.0
      */
-    static func removeReceiver(_ receiver: any EventReceivable, forEventType: Eventable.Type)
+    static func removeReceiver(_ receiver: any EventReceiving, forEventType: Eventable.Type)
     
     /**
      Unregisters the given `receiver` from all `Eventable` Types from the Central Event Dispatcher
      - Author: Simon J. Stuart
      - Version: 1.0.0
      */
-    static func removeReceiver(_ receiver: any EventReceivable)
+    static func removeReceiver(_ receiver: any EventReceiving)
     
     /**
      Adds the given `event` to the Central Event Queue with the given `priority`

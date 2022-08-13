@@ -1,5 +1,5 @@
 //
-// UIEventReceiver.swift
+// UIEventThread.swift
 // Copyright (c) 2022, Flowduino
 // Authored by Simon J. Stuart on 11th August 2022
 //
@@ -9,18 +9,18 @@
 import Foundation
 
 /**
- Abstract Base Type for all `UIEventRecevier` Thread Types.
+ Abstract Base Type for all `UIEventThread` Types.
  - Author: Simon J. Stuart
- - Version: 2.1.0
+ - Version: 4.0.0
  - Note: Inherit from this to implement a discrete unit of code designed specifically to operate upon specific `Eventable` types containing information useful to its operation(s)
  - Note: Your Event Handlers/Listeners/Callbacks will be executed on the UI Thread every time.
  */
-open class UIEventReceiver: EventReceiver, UIEventReceivable {
-    private static var _shared: UIEventReceivable? = nil
+open class UIEventThread: EventThread, UIEventThreadable {
+    private static var _shared: UIEventThreadable? = nil
     
-    public static var shared: UIEventReceivable {
+    public static var shared: UIEventThreadable {
         get {
-            if _shared == nil { _shared = UIEventReceiver() }
+            if _shared == nil { _shared = UIEventThread() }
             return _shared!
         }
     }

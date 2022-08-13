@@ -9,10 +9,10 @@
 import Foundation
 
 /**
- Protocol describing anything that Pools `EventReceivable`s
+ Protocol describing anything that Pools `EventThread`s
  - Author: Simon J. Stuart
  - Version: 3.1.0
  */
-public protocol EventPooling: AnyObject, EventReceivable {
+public protocol EventPooling: AnyObject, EventReceiving, EventDispatching {
     
 }
