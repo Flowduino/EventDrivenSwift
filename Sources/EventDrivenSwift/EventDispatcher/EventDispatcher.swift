@@ -60,6 +60,8 @@ open class EventDispatcher: EventHandler, EventDispatching {
             bucket!.removeAll { receiverContainer in
                 receiverContainer.receiver != nil && ObjectIdentifier(receiverContainer.receiver!) == ObjectIdentifier(receiver)
             }
+            
+            receivers[eventTypeName] = bucket // Update the Bucket for this Event Type
         }
     }
     

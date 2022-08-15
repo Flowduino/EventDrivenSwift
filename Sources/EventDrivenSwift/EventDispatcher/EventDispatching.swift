@@ -18,6 +18,9 @@ public protocol EventDispatching: EventHandling {
      Registers the given `receiver` for the given `Eventable` Type
      - Author: Simon J. Stuart
      - Version: 1.0.0
+     - Parameters:
+        - receiver: An Object conforming to `EventReceiving`
+        - forEventType: An `Eventable` Type Reference
      */
     func addReceiver(_ receiver: any EventReceiving, forEventType: Eventable.Type)
     
@@ -25,13 +28,18 @@ public protocol EventDispatching: EventHandling {
      Unregisters the given `receiver` from the given `Eventable` Type
      - Author: Simon J. Stuart
      - Version: 1.0.0
+     - Parameters:
+        - receiver: An Object conforming to `EventReceiving`
+        - forEventType: An `Eventable` Type Reference
      */
     func removeReceiver(_ receiver: any EventReceiving, forEventType: Eventable.Type)
     
     /**
-     Unregisters the given `receiver` from all `Eventable` Types
+     Unregisters the given `receiver` from **all** `Eventable` Types
      - Author: Simon J. Stuart
      - Version: 1.0.0
+     - Parameters:
+        - receiver: An Object conforming to `EventReceiving`
      */
     func removeReceiver(_ receiver: any EventReceiving)
 }

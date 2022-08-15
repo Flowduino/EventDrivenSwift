@@ -11,8 +11,24 @@ import Foundation
 /**
  Protocol describing anything that Pools `EventThread`s
  - Author: Simon J. Stuart
- - Version: 3.1.0
+ - Version: 4.0.0
  */
 public protocol EventPooling: AnyObject, EventReceiving, EventDispatching {
+    /**
+     The Balancer to use when determining which `EventThread` should receive an Inbound `Eventable
+     - Author: Simon J. Stuart
+     - Version: 4.0.0
+     - Returns: The Balancer to use when determining which `EventThread` should receive an Inbound `Eventable
+     */
+    var balancer: EventPoolBalancing { get set }
     
+    /**
+     The Scaler used to increase or reduce the number of Event Threads in response to load and performance.
+     - Author: Simon J. Stuart
+     - Version: 4.0.0
+     - Returns: The Scaler used to increase or reduce the number of Event Threads in response to load and performance.
+     */
+    var scaler: EventPoolScaling { get set }
+    
+    var capacity: UInt8 { get }
 }

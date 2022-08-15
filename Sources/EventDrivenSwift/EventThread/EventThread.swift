@@ -117,7 +117,7 @@ open class EventThread: EventReceiver, EventThreadable {
      - Parameters:
         - eventPool: Reference to the `EventPool` which owns this `EventThread` (default is `nil` which means there is no `EventPooling` for this Thread)
      */
-    public init(eventPool: EventPooling? = nil) {
+    required public init(eventPool: EventPooling? = nil) {
         self.eventPool = eventPool
         super.init()
         registerEventListeners()

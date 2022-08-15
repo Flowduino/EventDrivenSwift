@@ -14,5 +14,5 @@ import Foundation
  - Version: 3.1.0
  */
 public protocol EventThreadable: AnyObject, EventReceiving {
-
+    init(eventPool: EventPooling?)
 }
