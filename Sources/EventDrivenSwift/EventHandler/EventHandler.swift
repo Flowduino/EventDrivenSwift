@@ -100,7 +100,7 @@ open class EventHandler: ObservableThread, EventHandling {
      - Parameters:
         - event: The Event to Process.
      */
-    internal func processEvent(_ event: any Eventable, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
+    open func processEvent(_ event: any Eventable, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
         preconditionFailure("processEvent must be overriden!")
     }
     

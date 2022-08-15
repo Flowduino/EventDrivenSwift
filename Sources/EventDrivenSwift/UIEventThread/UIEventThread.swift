@@ -25,7 +25,7 @@ open class UIEventThread: EventThread, UIEventThreadable {
         }
     }
     
-    override internal func callTypedEventCallback<TEvent: Eventable>(_ callback: @escaping TypedEventCallback<TEvent>, forEvent: Eventable, priority: EventPriority) {
+    override open func callTypedEventCallback<TEvent: Eventable>(_ callback: @escaping TypedEventCallback<TEvent>, forEvent: Eventable, priority: EventPriority) {
         Task { /// Have to use a Task because this method is not `async`
             await MainActor.run { /// Forces the call to be invoked on the `MainActor` (UI Thread)
                 super.callTypedEventCallback(callback, forEvent: forEvent, priority:  priority)

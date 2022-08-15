@@ -82,7 +82,7 @@ open class EventDispatcher: EventHandler, EventDispatching {
      - Author: Simon J. Stuart
      - Version: 1.0.0
      */
-    override internal func processEvent(_ event: any Eventable, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
+    override open func processEvent(_ event: any Eventable, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
         let eventTypeName = String(reflecting: type(of: event))
         
         var snapReceivers = [String:[ReceiverContainer]]()

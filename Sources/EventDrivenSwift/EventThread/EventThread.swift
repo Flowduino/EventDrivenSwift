@@ -32,7 +32,7 @@ open class EventThread: EventReceiver, EventThreadable {
      - Author: Simon J. Stuart
      - Version: 4.0.0
      */
-    override internal func processEvent(_ event: any Eventable, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
+    override open func processEvent(_ event: any Eventable, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
         let eventTypeName = String(reflecting: type(of: event))
         var callback: EventCallback? = nil
 
@@ -53,7 +53,7 @@ open class EventThread: EventReceiver, EventThreadable {
         - callback: The code to invoke for the given `Eventable` Type
         - forEventType: The `Eventable` Type for which to Register  the Callback
      */
-    internal func addEventCallback<TEvent: Eventable>(_ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type) {
+    open func addEventCallback<TEvent: Eventable>(_ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type) {
         let eventTypeName = String(reflecting: forEventType)
         
         _eventCallbacks.withLock { eventCallbacks in
@@ -76,7 +76,7 @@ open class EventThread: EventReceiver, EventThreadable {
         - forEvent: The instance of the `Eventable` type to be processed
         - priority: The `EventPriority` with which the `forEvent` was dispatched
      */
-    internal func callTypedEventCallback<TEvent: Eventable>(_ callback: @escaping TypedEventCallback<TEvent>, forEvent: Eventable, priority: EventPriority) {
+    open func callTypedEventCallback<TEvent: Eventable>(_ callback: @escaping TypedEventCallback<TEvent>, forEvent: Eventable, priority: EventPriority) {
         if let typedEvent = forEvent as? TEvent {
             callback(typedEvent, priority)
         }
@@ -89,7 +89,7 @@ open class EventThread: EventReceiver, EventThreadable {
      - Parameters:
         - forEventType: The `Eventable` Type for which to Remove the Callback
      */
-    internal func removeEventCallback(forEventType: any Eventable) {
+    open func removeEventCallback(forEventType: any Eventable) {
         let eventTypeName = String(reflecting: forEventType)
         
         _eventCallbacks.withLock { eventCallbacks in
@@ -106,7 +106,7 @@ open class EventThread: EventReceiver, EventThreadable {
      - Author: Simon J. Stuart
      - Version: 4.0.0
      */
-    internal func registerEventListeners() {
+    open func registerEventListeners() {
         // No default implementation
     }
     

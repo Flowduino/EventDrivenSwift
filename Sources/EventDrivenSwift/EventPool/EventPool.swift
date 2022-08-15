@@ -100,7 +100,7 @@ open class EventPool<TEventThread: EventThreadable>: EventHandler, EventPooling 
         //TODO: Implement Scaling + Culling here
     }
     
-    override internal func processEvent(_ event: any Eventable, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
+    override open func processEvent(_ event: any Eventable, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
         let eventTypeName = String(reflecting: type(of: event))
         
         var snapPools = [String:[ThreadContainer]]()

@@ -47,7 +47,7 @@ open class EventListener: EventHandler, EventListenable {
         - dispatchMethod: The Means by which the Event was Dispatched
         - priority: The Priority given to the Event at the point of Dispatch
      */
-    override internal func processEvent(_ event: any Eventable, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
+    override open func processEvent(_ event: any Eventable, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
         let eventTypeName = String(reflecting: type(of: event))
         var listeners: [EventListenerContainer]? = nil
 
