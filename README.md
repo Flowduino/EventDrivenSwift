@@ -23,6 +23,11 @@ With Event-Driven systems, there is absolutely *no* direct reference between dis
 
 *Event Driven Swift* is an extremely powerful library designed specifically to power your Event-Driven Applications in the Swift language.
 
+## Decoupled Topology
+Where traditional software design principles would require communicating objects to reference each-other directly, Event-Driven design patterns eliminate the need for this.
+
+<img src="/Diagrams/Event-Driven%20SwiftUI%20View.png?raw=true" alt="Topological Diagram showing Event-Driven ViewModel being updated via Events from the Data Model Repository" title="Topological Diagram showing Event-Driven ViewModel being updated via Events from the Data Model Repository">
+
 ## Terminology
 Understanding the Terminology used in this Library and its supporting examples/documentation will aid you considerably in immediately leveraging these tools to produce extremely powerful, high-performance, entirely-decoupled and easily maintained Event-Driven solutions.
 
@@ -67,44 +72,44 @@ This means that we can enforce some degree of *execution order* over *Events* at
 
 ### Dispatch
 *Dispatch* is a term comparable to *Broadcast*.
-When we *Dispatch* an *Event*, it means that we are sending that information to every `EventReceiver` (see next section) that is listening for that *Event type*.
+When we *Dispatch* an *Event*, it means that we are sending that information to every `EventThread` (see next section) that is listening for that *Event type*.
 
 Once an *Event* has been *Dispatched*, it cannot be cancelled or modified. This is by design. Think of it as saying that "you cannot unsay something once you have said it."
 
 *Events* can be *Dispatched* from anywhere in your code, regardless of what *Thread* is invoking it. In this sense, *Events* are very much a **fire and forget** process.
 
-### `EventReceiver`
-An `EventReceiver` is a `class` inheriting the base type provided by this library called `EventReceiver`.
+### `EventThread`
+An `EventThread` is a `class` inheriting the base type provided by this library called `EventThread`.
 
-Beneath the surface, `EventReceiver` descends from `Thread`, and is literally what is known as a `Persistent Thread`.
+Beneath the surface, `EventThread` descends from `Thread`, and is literally what is known as a `Persistent Thread`.
 This means that the `Thread` would typically exist either for a long as your particular application would require it, or even for the entire lifetime of your application.
 
-Unlike most Threads, `EventReceiver` has been built specifically to operate with the lowest possible system resource footprint. When there are no *Events* waiting to be processed by your `EventReceiver`, the Thread will consume absolutely no CPU time, and effectively no power at all.
+Unlike most Threads, `EventThread` has been built specifically to operate with the lowest possible system resource footprint. When there are no *Events* waiting to be processed by your `EventThread`, the Thread will consume absolutely no CPU time, and effectively no power at all.
 
-Once your `EventReceiver` receives an *Event* of an `Eventable` type to which it has *subscribed*, it will *wake up* automatically and process any waiting *Events* in its respective *Queue* and *Stack*.
+Once your `EventThread` receives an *Event* of an `Eventable` type to which it has *subscribed*, it will *wake up* automatically and process any waiting *Events* in its respective *Queue* and *Stack*.
 
-**Note:** any number of `EventReceiver`s can receive the same *Event*s. This means that you can process the same *Event* for any number of purposes, in any number of ways, with any number of outcomes.
+**Note:** any number of `EventThread`s can receive the same *Event*s. This means that you can process the same *Event* for any number of purposes, in any number of ways, with any number of outcomes.
 
 ### Event Handler (or Callback)
-When you define your `EventReceiver` descendant, you will implement a function called `registerEventListeners`. Within this function (which is invoked automatically every time an Instance of your `EventReceiver` descendant type is initialised) you will register the `Eventable` Types to which your `EventReceiver` is interested; and for each of those, define a suitable *Handler* (or *Callback*) method to process those *Events* whenever they occur.
+When you define your `EventThread` descendant, you will implement a function called `registerEventListeners`. Within this function (which is invoked automatically every time an Instance of your `EventThread` descendant type is initialised) you will register the `Eventable` Types to which your `EventThread` is interested; and for each of those, define a suitable *Handler* (or *Callback*) method to process those *Events* whenever they occur.
 
-You will see detailed examples of this in the **Usage** section of this document later, but the key to understand here is that, for each `Eventable` type that your `EventReceiver` is interested in processing, you will be able to register your *Event Handler* for that *Event* type in a single line of code.
+You will see detailed examples of this in the **Usage** section of this document later, but the key to understand here is that, for each `Eventable` type that your `EventThread` is interested in processing, you will be able to register your *Event Handler* for that *Event* type in a single line of code.
 
-This makes it extremely easy to manage and maintain the *Event Subscriptions* that each `EventReceiver` has been implemented to process.
+This makes it extremely easy to manage and maintain the *Event Subscriptions* that each `EventThread` has been implemented to process.
 
 ## Performance-Centric
 `EventDrivenSwift` is designed specifically to provide the best possible performance balance both at the point of *Dispatching* an *Event*, as well as at the point of *Processing* an *Event*.
 
-With this in mind, `EventDrivenSwift` provides a *Central Event Dispatch Handler* by default. Whenever you *Dispatch* an *Event* through either a *Queue* or *Stack*, it will be immediately enqueued within the *Central Event Dispatch Handler*, where it will subsequently be *Dispatched* to all registered `EventReceiver`s through its own *Thread*.
+With this in mind, `EventDrivenSwift` provides a *Central Event Dispatch Handler* by default. Whenever you *Dispatch* an *Event* through either a *Queue* or *Stack*, it will be immediately enqueued within the *Central Event Dispatch Handler*, where it will subsequently be *Dispatched* to all registered `EventThread`s through its own *Thread*.
 
 This means that there is a near-zero wait time between instructing an *Event* to *Dispatch*, and continuing on in the invoking Thread's execution.
 
-Despite using an intermediary Handler in this manner, the time between *Dispatch* of an *Event* and the *Processing* of that *Event* by each `EventReceiver` is **impressively short!** This makes `EventDrivenSwift` more than useful for performance-critical applications, including videogames!
+Despite using an intermediary Handler in this manner, the time between *Dispatch* of an *Event* and the *Processing* of that *Event* by each `EventThread` is **impressively short!** This makes `EventDrivenSwift` more than useful for performance-critical applications, including videogames!
 
 ## Built on `Observable`
-`EventDrivenSwift` is built on top of our [`Observable` library](https://github.com/flowduino/observable), and `EventReceiver` descends from `ObservableThread`, meaning that it supports full *Observer Pattern* behaviour as well as *Event-Driven* behaviour.
+`EventDrivenSwift` is built on top of our [`Observable` library](https://github.com/flowduino/observable), and `EventThread` descends from `ObservableThread`, meaning that it supports full *Observer Pattern* behaviour as well as *Event-Driven* behaviour.
 
-Put simply: you can Observe `EventReceiver`s anywhere in your code that it is necessary, including from SwiftUI Views.
+Put simply: you can Observe `EventThread`s anywhere in your code that it is necessary, including from SwiftUI Views.
 
 This means that your application can dynamically update your Views in response to *Events* being received and processed, making your application truly and fully multi-threaded, without you having to produce code to handle the intra-Thread communication yourself.
 
@@ -125,7 +130,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/Flowduino/EventDrivenSwift.git",
-            .upToNextMajor(from: "3.0.0")
+            .upToNextMajor(from: "4.0.0")
         ),
     ],
     //...
@@ -186,14 +191,14 @@ temperatureEvent.stack(priority: .highest)
 ```
 Above would be with `.highest` *Priority*.
 
-### Defining an `EventReceiver`
-So, we have an *Event* type, and we are able to *Dispatch* it through a *Queue* or a *Stack*, with whatever *Priority* we desire. Now we need to define an `EventReceiver` to listen for and process our `TemperatureEvent`s.
+### Defining an `EventThread`
+So, we have an *Event* type, and we are able to *Dispatch* it through a *Queue* or a *Stack*, with whatever *Priority* we desire. Now we need to define an `EventThread` to listen for and process our `TemperatureEvent`s.
 
 **Note:** Code example in this section was updated for Version 2.0.0 due to considerable improvements, which necessitated changing the Interface slightly (for the better)
 
 ```swift
-class TemperatureProcessor: EventReceiver {
-    /// Register our Event Listeners for this EventReceiver
+class TemperatureProcessor: EventThread {
+    /// Register our Event Listeners for this EventThread
     override func registerEventListeners() {
         addEventCallback(onTemperatureEvent, forEventType: TemperatureEvent.self)
     }
@@ -206,7 +211,7 @@ class TemperatureProcessor: EventReceiver {
 ```
 Before we dig into the implementation of `onTemperatureEvent`, which can basically do whatever we would want to do with the data provided in the `TemperatureEvent`, let's take a moment to understand what is happening in the above code.
 
-Firstly, `TemperatureProcessor` inherits from `EventReceiver`, which is where all of the magic happens to receive *Events* and register our *Listeners* (or *Callbacks* or *Handlers*).
+Firstly, `TemperatureProcessor` inherits from `EventThread`, which is where all of the magic happens to receive *Events* and register our *Listeners* (or *Callbacks* or *Handlers*).
 
 The function `registerEventListeners` will be called automatically when an instance of `TemperatureProcessor` is created. Within this method, we call `addEventCallback` to register `onTemperatureEvent` so that it will be invoked every time an *Event* of type `TemperatureEvent` is *Dispatched*.
 
@@ -250,7 +255,7 @@ Now, let's actually do something with our `TemperatureEvent` in the `onTemperatu
     }
 }
 ```
-The above code is intended to be illustrative, rather than *useful*. Our `onTemperatureEvent` passes *Event*'s encapsulated `temperatureInCelsius` to a public variable (which could then be read by other code as necessary) as part of our `EventReceiver`, and also pre-calculates a `TemperatureRating` based on the Temperature value received in the *Event*.
+The above code is intended to be illustrative, rather than *useful*. Our `onTemperatureEvent` passes *Event*'s encapsulated `temperatureInCelsius` to a public variable (which could then be read by other code as necessary) as part of our `EventThread`, and also pre-calculates a `TemperatureRating` based on the Temperature value received in the *Event*.
 
 Ultimately, your code can do whatever you wish with the *Event*'s *Payload* data!
 
@@ -285,8 +290,8 @@ print("Temp Rating: \(temperatureProcessor.temperatureRating)")
 ```
 
 Now you have a little Playground code to visually confirm that your *Events* are being processed. You can modify this to see what happens.
-### Observing an `EventReceiver`
-Remember, `EventRecevier`s are also *Observable*, so we can not only receive and operate on *Events*, we can also notify *Observers* in response to *Events*.
+### Observing an `EventThread`
+Remember, `EventThread`s are also *Observable*, so we can not only receive and operate on *Events*, we can also notify *Observers* in response to *Events*.
 
 Let's take a look at a simple example based on the examples above.
 We shall begin by defining an *Observer Protocol*:
@@ -307,7 +312,7 @@ Now let's modify the `onTemperatureEvent` method we implemented in the previous 
         }
     }
 ```
-Now, every time a `TemperatureEvent` is processed by the `EventReceiver`, it will also notify any direct *Observers* as well.
+Now, every time a `TemperatureEvent` is processed by the `EventThread`, it will also notify any direct *Observers* as well.
 
 It should be noted that this functionality serves as a *complement* to *Event-Driven* behaviour, as there is no "one size fits all" solution to every requirement in software. It is often neccessary to combine methodologies to achieve the best results.
 
@@ -343,10 +348,10 @@ With the *Event* type defined, we can now once more expand our `onTemperatureEve
 ``` 
 As you can see, we can create and *Dispatch* an *Event* in a single operation. This is because *Events* should be considered to be "fire and forget". You need only retain a copy of the *Event* within the *Dispatching Method* if you wish to use its values later in the same operation. Otherwise, just create it and *Dispatch* it together, as shown above.
 
-Now that we've walked through these basic Usage Examples, see if you can produce your own `EventReceiver` to process `TemperatureRatingEvent`s. Everything you need to achieve this has already been demonstrated in this document.
+Now that we've walked through these basic Usage Examples, see if you can produce your own `EventThread` to process `TemperatureRatingEvent`s. Everything you need to achieve this has already been demonstrated in this document.
 
-## `UIEventReceiver`
-Version 2.0.0 introduced the `UIEventReceiver` base class, which operates exactly the same way as `EventReciever`, with the notable difference being that your registered *Event* Callbacks will **always** be invoked on the `MainActor` (or "UI Thread"). You can simply inherit from `UIEventReceiver` instead of `EventReceiver` whenever it is imperative for one or more *Event* Callbacks to execute on the `MainActor`.
+## `UIEventThread`
+Version 2.0.0 introduced the `UIEventThread` base class, which operates exactly the same way as `EventThread`, with the notable difference being that your registered *Event* Callbacks will **always** be invoked on the `MainActor` (or "UI Thread"). You can simply inherit from `UIEventThread` instead of `EventThread` whenever it is imperative for one or more *Event* Callbacks to execute on the `MainActor`.
 
 ## `EventListener`
 Version 3.0.0 introduced the `EventListener` concept to the Library.
@@ -355,7 +360,7 @@ An `EventListener` is a universal way of subscribing to *Events*, anywhere in yo
 
 By design, `EventDrivenSwift` provides a *Central Event Listener*, which is automatically initialized should any of your code register a *Listener* for an *Event* by reference to the `Eventable` type.
 
-**Important Note:** `EventListener` will always invoke the associated `Callbacks` on the same Thread (or `DispatchQueue`) from whence the *Listener* registered! This is an extremely useful behaviour, because it means that *Listeners* registered from the `MainActor` (or "UI Thread") will always execute on that Thread, with no additional overhead or code required by you.
+**Important Note:** `EventListener` will (by default) invoke the associated `Callbacks` on the same Thread (or `DispatchQueue`) from whence the *Listener* registered! This is an extremely useful behaviour, because it means that *Listeners* registered from the `MainActor` (or "UI Thread") will always execute on that Thread, with no additional overhead or code required by you.
 
 Let's register a simple *Listener* in some arbitrary `class`. For this example, let's produce a hypothetical *View Model* that will *Listen* for `TemperatureRatingEvent`, and would invalidate an owning `View` to show the newly-received values.
 
@@ -386,6 +391,19 @@ In the above example, whenever the *Reciprocal Event* named `TemperatureRatingEv
 
 Don't worry about managing the lifetime of your *Listener*! If the object which owns the *Listener* is destroyed, the *Listener* will be automatically unregistered for you!
 
+If you need your *Event Callback* to execute on the *Listener's* Thread, as of Version 3.1.0... you can!
+```swift
+listenerToken = TemperatureRatingEvent.addListener(self, onTemperatureRatingEvent, executeOn: .listenerThread)
+```
+**Remember:** When executing an *Event Callback* on `.listenerThread`, you will need to ensure that your *Callback* and all resources that it uses are 100% Thread-Safe!
+**Important:** Executing the *Event Callback* on `.listnerThread` can potentially delay the invocation of other *Event Callbacks*. Only use this option when it is necessary.
+
+You can also execute your *Event Callback* on an ad-hoc `Task`:
+```swift
+listenerToken = TemperatureRatingEvent.addListener(self, onTemperatureRatingEvent, executeOn: .taskThread)
+```
+**Remember:** When executing an *Event Callback* on `.taskThread`, you will need to ensure that your *Callback* and all resources that it uses are 100% Thread-Safe!
+
 Another thing to note about the above example is the `listenerToken`. Whenever you register a *Listener*, it will return a Unique Universal ID (a `UUID`) value. You can use this value to *Unregister* your *Listener* at any time:
 ```swift
     TemperatureRatingEvent.removeListener(listenerToken)
@@ -394,11 +412,37 @@ This way, when an *Event* is no longer relevant to your code, you can simply cal
 
 `EventListener`s are an extremely versatile and very powerful addition to `EventDrivenSwift`.
 
+## `EventPool`
+Version 4.0.0 introduces the extremely powerful `EventPool` solution, making it possible to create managed groups of `EventThread`s, where inbound *Events* will be directed to the best `EventThread` in the `EventPool` at any given moment.
+
+`EventDrivenSwift` makes it trivial to produce an `EventPool` for any given `EventThread` type.
+
+To create an `EventPool` of our `TemperatureProcessor` example from earlier, we can use a single line of code:
+```swift
+var temperatureProcessorPool = EventPool<TemperatureProcessor>(capacity: 5)
+```
+The above example will create an `EventPool` of `TemperatureProcessor`s, with an initial *Capacity* of **5** instances. This means that your program can concurrently process **5** `TemperatureEvent`s.
+Obviously, for a process so simple and quick to complete as our earlier example, it would not be neccessary to produce an `EventPool`, but you can adapt this example for your own, more complex and time-consuming, `EventThread` implementations to immediately parallelise them.
+
+`EventPool`s enable you to specify the most context-appropriate *Balancer* on initialization:
+```swift
+var temperatureProcessorPool = EventPool<TemperatureProcessor>(capacity: 5, balancer: EventPoolRoundRobinBalancer())
+```
+The above example would use the `EventPoolRoundRobinBalancer` implementation, which simply directs each inbound `Eventable` to the next `EventThread` in the pool, rolling back around to the first after using the final `EventThread` in the pool.
+
+There is also another *Balancer* available in version 4.0.0: 
+```swift
+var temperatureProcessorPool = EventPool<TemperatureProcessor>(capacity: 5, balancer: EventPoolLowestLoadBalancer())
+```
+The above example would use the `EventPoolLowestLoadBalancer` implementation, which simply directs each inbound `Eventable` to the `EventThread` in the pool with the lowest number of pending `Eventable`s in its own *Queue* and *Stack*.
+
+**NOTE:** When no `balancer` is declared, `EventPool` will use `EventPoolRoundRobinBalancer` by default.
+
 ## Features Coming Soon
 `EventDrivenSwift` is an evolving and ever-improving Library, so here is a list of the features you can expect in future releases:
-- **Event Pools** - A superset expanding upon a given `EventReceiver` descendant type to provide pooled processing based on given scaling rules and conditions.
+- **Event Pool Scalers** - Dynamic Scaling for `EventPool` instances will be fully-implemented
 
-These are the features intended for the next Release, which will either be *3.1.0* or *4.0.0* depending on whether these additions require interface-breaking changes to the interfaces in version *3.0.0*.
+These are the features intended for the next Release, which will either be *4.1.0* or *5.0.0* depending on whether these additions require interface-breaking changes to the interfaces in version *4.0.0*.
 
 ## License
 

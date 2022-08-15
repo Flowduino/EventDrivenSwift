@@ -16,9 +16,9 @@ import Observable
  - Version: 1.0.0
  - Note: While you can inherit from and even create instances of `EventDispatcher`, best practice would be to use `EventCentral.shared` as the central Event Dispatcher.
  */
-open class EventDispatcher: EventHandler, EventDispatchable {
+open class EventDispatcher: EventHandler, EventDispatching {
     struct ReceiverContainer {
-        weak var receiver: (any EventReceivable)?
+        weak var receiver: (any EventReceiving)?
     }
     
     /**
@@ -28,7 +28,7 @@ open class EventDispatcher: EventHandler, EventDispatchable {
      */
     @ThreadSafeSemaphore private var receivers = [String:[ReceiverContainer]]()
     
-    public func addReceiver(_ receiver: any EventReceivable, forEventType: Eventable.Type) {
+    public func addReceiver(_ receiver: any EventReceiving, forEventType: Eventable.Type) {
         let eventTypeName = String(reflecting: forEventType)
         
         _receivers.withLock { receivers in
@@ -49,7 +49,7 @@ open class EventDispatcher: EventHandler, EventDispatchable {
         }
     }
     
-    public func removeReceiver(_ receiver: any EventReceivable, forEventType: Eventable.Type) {
+    public func removeReceiver(_ receiver: any EventReceiving, forEventType: Eventable.Type) {
         let eventTypeName = String(reflecting: forEventType)
         
         _receivers.withLock { receivers in
@@ -60,10 +60,12 @@ open class EventDispatcher: EventHandler, EventDispatchable {
             bucket!.removeAll { receiverContainer in
                 receiverContainer.receiver != nil && ObjectIdentifier(receiverContainer.receiver!) == ObjectIdentifier(receiver)
             }
+            
+            receivers[eventTypeName] = bucket // Update the Bucket for this Event Type
         }
     }
     
-    public func removeReceiver(_ receiver: any EventReceivable) {
+    public func removeReceiver(_ receiver: any EventReceiving) {
         _receivers.withLock { receivers in
             for (eventTypeName, bucket) in receivers { /// Iterate every Event Type
                 var newBucket = bucket // Copy the Bucket

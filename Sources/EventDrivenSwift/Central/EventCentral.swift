@@ -28,27 +28,27 @@ final public class EventCentral: EventDispatcher, EventCentralable {
      - Author: Simon J. Stuart
      - Version: 1.0.0
      */
-    @inline(__always) public static var shared: EventDispatchable {
+    @inline(__always) public static var shared: EventDispatching {
         @inline(__always) get {
             return _shared
         }
     }
     
-    @inline(__always) public static subscript() -> EventDispatchable {
+    @inline(__always) public static subscript() -> EventDispatching {
         @inline(__always) get {
             return _shared
         }
     }
     
-    @inline(__always) public static func addReceiver(_ receiver: EventReceivable, forEventType: Eventable.Type) {
+    @inline(__always) public static func addReceiver(_ receiver: EventReceiving, forEventType: Eventable.Type) {
         _shared.addReceiver(receiver, forEventType: forEventType)
     }
     
-    @inline(__always) public static func removeReceiver(_ receiver: EventReceivable, forEventType: Eventable.Type) {
+    @inline(__always) public static func removeReceiver(_ receiver: EventReceiving, forEventType: Eventable.Type) {
         _shared.removeReceiver(receiver, forEventType: forEventType)
     }
     
-    @inline(__always) public static func removeReceiver(_ receiver: EventReceivable) {
+    @inline(__always) public static func removeReceiver(_ receiver: EventReceiving) {
         _shared.removeReceiver(receiver)
     }
     
@@ -74,8 +74,8 @@ final public class EventCentral: EventDispatcher, EventCentralable {
         }
     }
     
-    @discardableResult @inline(__always) public static func addListener<TEvent>(_ requester: AnyObject, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type) -> UUID where TEvent : Eventable {
-        return _shared.eventListener.addListener(requester, callback, forEventType: forEventType)
+    @discardableResult @inline(__always) public static func addListener<TEvent>(_ requester: AnyObject, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn = .requesterThread) -> UUID where TEvent : Eventable {
+        return _shared.eventListener.addListener(requester, callback, forEventType: forEventType, executeOn: executeOn)
     }
     
     @inline(__always) public static func removeListener(_ token: UUID) {

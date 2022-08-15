@@ -15,8 +15,12 @@ import Observable
  - Author: Simon J. Stuart
  - Version: 1.0.0
  - Note: This is the Common Base Type for `EventDispatcher` and `EventReceiver` base types
+ - Note: This class should not be instantiated directly
+ - Note: `EventDispatcher` inherits from this
+ - Note: `EventReceiver` inherits from this
+ 
  */
-open class EventHandler: ObservableThread, EventHandlable {
+open class EventHandler: ObservableThread, EventHandling {
     /**
     A Map of `EventPriority` against an Array of `Eventable` in that corresponding Queue
      - Author: Simon J. Stuart

@@ -27,6 +27,7 @@ open class EventListener: EventHandler, EventListenable {
         weak var requester: AnyObject?
         var callback: EventCallback
         var dispatchQueue: DispatchQueue?
+        var executeOn: ExecuteEventOn = .requesterThread
     }
     
     /**
@@ -54,27 +55,37 @@ open class EventListener: EventHandler, EventListenable {
             listeners = eventListeners[eventTypeName]
         }
 
-        if listeners == nil { return } // If there is no Callback, we will just return!
+        if listeners == nil { return } // If there are no Listeners, we will just return!
 
         for listener in listeners! {
             if listener.requester == nil { // If the Requester no longer exists...
                 removeListener(listener.token, typeOf: type(of: event)) // ... Unregister this Listener
                 continue // Skip this one
             }
-            // Execute the Callback on the Listener's own Dispatch Queue
-            let dispatchQueue = listener.dispatchQueue ?? DispatchQueue.main
-            dispatchQueue.async {
+            switch listener.executeOn {
+            case .requesterThread:
+                Task { // We raise a Task because we don't want the entire Listener blocked in the event the dispatchQueue is busy or blocked!
+                    let dispatchQueue = listener.dispatchQueue ?? DispatchQueue.main
+                    dispatchQueue.async {
+                        listener.callback(event, priority)
+                    }
+                }
+            case .listenerThread:
                 listener.callback(event, priority)
+            case .taskThread:
+                Task {
+                    listener.callback(event, priority)
+                }
             }
         }
     }
     
-    @discardableResult public func addListener<TEvent: Eventable>(_ requester: AnyObject, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type) -> UUID {
+    @discardableResult public func addListener<TEvent: Eventable>(_ requester: AnyObject, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn = .requesterThread) -> UUID {
         let eventTypeName = String(reflecting: forEventType)
         let method: EventCallback = { event, priority in
             self.callTypedEventCallback(callback, forEvent: event, priority: priority)
         }
-        let eventListenerContainer = EventListenerContainer(requester: requester, callback: method, dispatchQueue: OperationQueue.current?.underlyingQueue)
+        let eventListenerContainer = EventListenerContainer(requester: requester, callback: method, dispatchQueue: OperationQueue.current?.underlyingQueue, executeOn: executeOn)
         _eventListeners.withLock { eventCallbacks in
             var bucket = eventCallbacks[eventTypeName]
             if bucket == nil { bucket = [EventListenerContainer]() } // Create a new bucket if there isn't already one!

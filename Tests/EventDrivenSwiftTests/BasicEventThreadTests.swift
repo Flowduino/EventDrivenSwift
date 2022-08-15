@@ -1,5 +1,5 @@
 //
-// BasicEventReceiverTests.swift
+// BasicEventThreadTests.swift
 // Copyright (c) 2022, Flowduino
 // Authored by Simon J. Stuart on 4th August 2022
 //
@@ -10,12 +10,12 @@ import XCTest
 import ThreadSafeSwift
 @testable import EventDrivenSwift
 
-final class BasicEventReceiverTests: XCTestCase {
+final class BasicEventThreadTests: XCTestCase {
     struct TestEventTypeOne: Eventable {
         var foo: Int
     }
     
-    class TestEventThread: EventReceiver {
+    class TestEventThread: EventThread {
         @ThreadSafeSemaphore var foo: Int = 0
         public var awaiter = DispatchSemaphore(value: 0)
         

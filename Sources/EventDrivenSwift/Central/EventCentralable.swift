@@ -14,21 +14,21 @@ public protocol EventCentralable {
      - Author: Simon J. Stuart
      - Version: 1.0.0
      */
-    static func addReceiver(_ receiver: any EventReceivable, forEventType: Eventable.Type)
+    static func addReceiver(_ receiver: any EventReceiving, forEventType: Eventable.Type)
     
     /**
      Unregisters the given `receiver` from the given `Eventable` Type for the Central Event Dispatcher
      - Author: Simon J. Stuart
      - Version: 1.0.0
      */
-    static func removeReceiver(_ receiver: any EventReceivable, forEventType: Eventable.Type)
+    static func removeReceiver(_ receiver: any EventReceiving, forEventType: Eventable.Type)
     
     /**
      Unregisters the given `receiver` from all `Eventable` Types from the Central Event Dispatcher
      - Author: Simon J. Stuart
      - Version: 1.0.0
      */
-    static func removeReceiver(_ receiver: any EventReceivable)
+    static func removeReceiver(_ receiver: any EventReceiving)
     
     /**
      Adds the given `event` to the Central Event Queue with the given `priority`
@@ -68,7 +68,7 @@ public protocol EventCentralable {
         - forEventType: The `Eventable` Type for which to Register  the Callback
      - Returns: A `UUID` value representing the `token` associated with this Event Callback
      */
-    @discardableResult static func addListener<TEvent: Eventable>(_ requester: AnyObject, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type) -> UUID
+    @discardableResult static func addListener<TEvent: Eventable>(_ requester: AnyObject, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn) -> UUID
     
     /**
      Locates and removes the given Listener `token` (if it exists) from the Central Event Listener

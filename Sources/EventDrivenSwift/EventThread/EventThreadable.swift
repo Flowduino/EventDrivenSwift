@@ -1,5 +1,5 @@
 //
-// EventReceivable.swift
+// EventThreadable.swift
 // Copyright (c) 2022, Flowduino
 // Authored by Simon J. Stuart on 4th August 2022
 //
@@ -9,10 +9,10 @@
 import Foundation
 
 /**
- Protocol describing anything that Receives Events
+ Protocol describing Threads that are Event-Driven
  - Author: Simon J. Stuart
- - Version: 1.0.0
+ - Version: 3.1.0
  */
-public protocol EventReceivable: AnyObject, EventHandlable {
-
+public protocol EventThreadable: AnyObject, EventReceiving {
+    init(eventPool: EventPooling?)
 }
