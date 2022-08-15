@@ -130,7 +130,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/Flowduino/EventDrivenSwift.git",
-            .upToNextMajor(from: "3.1.0")
+            .upToNextMajor(from: "4.0.0")
         ),
     ],
     //...
@@ -412,11 +412,37 @@ This way, when an *Event* is no longer relevant to your code, you can simply cal
 
 `EventListener`s are an extremely versatile and very powerful addition to `EventDrivenSwift`.
 
+## `EventPool`
+Version 4.0.0 introduces the extremely powerful `EventPool` solution, making it possible to create managed groups of `EventThread`s, where inbound *Events* will be directed to the best `EventThread` in the `EventPool` at any given moment.
+
+`EventDrivenSwift` makes it trivial to produce an `EventPool` for any given `EventThread` type.
+
+To create an `EventPool` of our `TemperatureProcessor` example from earlier, we can use a single line of code:
+```swift
+var temperatureProcessorPool = EventPool<TemperatureProcessor>(capacity: 5)
+```
+The above example will create an `EventPool` of `TemperatureProcessor`s, with an initial *Capacity* of **5** instances. This means that your program can concurrently process **5** `TemperatureEvent`s.
+Obviously, for a process so simple and quick to complete as our earlier example, it would not be neccessary to produce an `EventPool`, but you can adapt this example for your own, more complex and time-consuming, `EventThread` implementations to immediately parallelise them.
+
+`EventPool`s enable you to specify the most context-appropriate *Balancer* on initialization:
+```swift
+var temperatureProcessorPool = EventPool<TemperatureProcessor>(capacity: 5, balancer: EventPoolRoundRobinBalancer())
+```
+The above example would use the `EventPoolRoundRobinBalancer` implementation, which simply directs each inbound `Eventable` to the next `EventThread` in the pool, rolling back around to the first after using the final `EventThread` in the pool.
+
+There is also another *Balancer* available in version 4.0.0: 
+```swift
+var temperatureProcessorPool = EventPool<TemperatureProcessor>(capacity: 5, balancer: EventPoolLowestLoadBalancer())
+```
+The above example would use the `EventPoolLowestLoadBalancer` implementation, which simply directs each inbound `Eventable` to the `EventThread` in the pool with the lowest number of pending `Eventable`s in its own *Queue* and *Stack*.
+
+**NOTE:** When no `balancer` is declared, `EventPool` will use `EventPoolRoundRobinBalancer` by default.
+
 ## Features Coming Soon
 `EventDrivenSwift` is an evolving and ever-improving Library, so here is a list of the features you can expect in future releases:
-- **Event Pools** - A superset expanding upon a given `EventThread` descendant type to provide pooled processing based on given scaling rules and conditions.
+- **Event Pool Scalers** - Dynamic Scaling for `EventPool` instances will be fully-implemented
 
-These are the features intended for the next Release, which will either be *3.2.0* or *4.0.0* depending on whether these additions require interface-breaking changes to the interfaces in version *3.1.0*.
+These are the features intended for the next Release, which will either be *4.1.0* or *5.0.0* depending on whether these additions require interface-breaking changes to the interfaces in version *4.0.0*.
 
 ## License
 

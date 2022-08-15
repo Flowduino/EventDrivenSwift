@@ -157,7 +157,7 @@ open class EventPool<TEventThread: EventThreadable>: EventHandler, EventPooling 
         super.init()
         // Now we create all of our Event Threads
         var current = 0
-        while current < capacity + 1 {
+        while current < capacity {
             let eventThread = TEventThread(eventPool: self)
             eventThreads.append(eventThread)
             current += 1
