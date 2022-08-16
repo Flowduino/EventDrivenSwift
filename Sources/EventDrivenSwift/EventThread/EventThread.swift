@@ -85,11 +85,11 @@ open class EventThread: EventReceiver, EventThreadable {
     /**
      Removes an Event Callback for the given `Eventable` Type
      - Author: Simon J. Stuart
-     - Version: 4.0.0
+     - Version: 4.0.2
      - Parameters:
         - forEventType: The `Eventable` Type for which to Remove the Callback
      */
-    open func removeEventCallback(forEventType: any Eventable) {
+    open func removeEventCallback(forEventType: Eventable.Type) {
         let eventTypeName = String(reflecting: forEventType)
         
         _eventCallbacks.withLock { eventCallbacks in
@@ -98,7 +98,7 @@ open class EventThread: EventReceiver, EventThreadable {
         
         let dispatcher: EventDispatching = eventPool == nil ? EventCentral.shared : eventPool!
         
-        dispatcher.removeReceiver(self, forEventType: type(of: forEventType))
+        dispatcher.removeReceiver(self, forEventType: forEventType)
     }
     
     /**
