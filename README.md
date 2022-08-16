@@ -439,10 +439,14 @@ The above example would use the `EventPoolLowestLoadBalancer` implementation, wh
 **NOTE:** When no `balancer` is declared, `EventPool` will use `EventPoolRoundRobinBalancer` by default.
 
 ## Features Coming Soon
-`EventDrivenSwift` is an evolving and ever-improving Library, so here is a list of the features you can expect in future releases:
-- **Event Pool Scalers** - Dynamic Scaling for `EventPool` instances will be fully-implemented
+`EventDrivenSwift` is an evolving and ever-improving Library, so here are lists of the features you can expect in future releases.
 
-These are the features intended for the next Release, which will either be *4.1.0* or *5.0.0* depending on whether these additions require interface-breaking changes to the interfaces in version *4.0.0*.
+Version 4.1.0 (or 5.0.0 if interface-breaking changes are required):
+- **Event Pool Scalers** - Dynamic Scaling for `EventPool` instances will be fully-implemented
+- **Latest-Only Events** - A Dispatch option to replace any unprocessed (older) *Events* with the newest *Event* of that specific *Eventable* type. This will be useful for things like sensor readings, where you only care about the most recent value possible (because older values are no longer relevant)
+
+Version 5.1.0 (or 6.0.0 if interface-breaking changes are required):
+- **Event Scheduling** - A Dispatch Scheduler to ensure that *Events* aren't Dispatched until a specific time (or after a specific interval)
 
 ## License
 
