@@ -20,11 +20,9 @@ public protocol ThreadEventMethodContainer {
     associatedtype TEventType: Eventable
     associatedtype TOwner: EventThread
     
-    var wrappedValue: EventMethodTypedEventCallback<TOwner, TEventType> { get set }
+    var wrappedValue: EventMethodTypedEventCallback<TOwner, TEventType>? { get set }
     
-    var owner: AnyObject? { get set }
-    
-    mutating func unregister()
+    mutating func prepare(owner: AnyObject)
 }
 
 /**
@@ -34,11 +32,13 @@ public protocol ThreadEventMethodContainer {
  - Note: Inherit from this to implement a discrete unit of code designed specifically to operate upon specific `Eventable` types containing information useful to its operation(s)
  */
 open class EventThread: EventReceiver, EventThreadable {
+    public typealias EventMethodTypedEventCallback<TOwner: EventThread, TEvent: Any> = (_ sender: TOwner, _ event: TEvent, _ priority: EventPriority) -> ()
     /**
      Property Wrapper to simplify the registration of Event Callbacks in `EventThread`-inheriting types.
      - Author: Simon J. Stuart
      - Version: 4.1.0
      - Note: Any Event Callback implemented this way will be automatically registered for you.
+     - Note: You cannot unregister or modify the Callback in any way. They are immutable.
      ````
      @EventMethod<MyEventThreadType, MyEventType>
      private var onMyEvent = {
@@ -49,47 +49,25 @@ open class EventThread: EventReceiver, EventThreadable {
      */
     @propertyWrapper
     public struct EventMethod<TOwner: EventThread, TEventType: Eventable>: ThreadEventMethodContainer {
-        public typealias EventMethodTypedEventCallback<TOwner: EventThread, TEvent: Any> = (_ sender: TOwner, _ event: TEvent, _ priority: EventPriority) -> ()
+        public var wrappedValue: EventMethodTypedEventCallback<TOwner, TEventType>?
         
-        mutating public func unregister() {
-            if token == nil { return }
-            if let typedOwner = owner as? TOwner {
-                typedOwner.removeEventCallback(token: token!)
-            }
-        }
-        
-        private var token: UUID? = nil
-        private var lock = DispatchSemaphore(value: 1)
-        
-        public var wrappedValue: EventMethodTypedEventCallback<TOwner, TEventType> {
-            didSet {
-                reRegsiterListener()
-            }
-        }
-        
-        public var owner: AnyObject? {
-            didSet {
-                reRegsiterListener()
-            }
-        }
+        private var owner: AnyObject? = nil
         
         @inline(__always) private func callback(event: TEventType, priority: EventPriority) {
             if let typedOwner = owner as? TOwner {
-                wrappedValue(typedOwner, event, priority)
+                wrappedValue?(typedOwner, event, priority)
             }
         }
-        
-        mutating private func reRegsiterListener() {
-            lock.wait()
-            if let typedOwner = owner as? TOwner {
-                unregister()
-                token = typedOwner.addEventCallback(callback, forEventType: TEventType.self)
-            }
-            lock.signal()
-        }
-        
-        public init(wrappedValue: @escaping EventMethodTypedEventCallback<TOwner, TEventType>) {
+
+        public init(wrappedValue: EventMethodTypedEventCallback<TOwner, TEventType>?) {
             self.wrappedValue = wrappedValue
+        }
+        
+        mutating public func prepare(owner: AnyObject) {
+            if let typedOwner = owner as? TOwner {
+                self.owner = owner
+                typedOwner.addEventCallback(callback, forEventType: TEventType.self)
+            }
         }
     }
     
@@ -113,6 +91,7 @@ open class EventThread: EventReceiver, EventThreadable {
      - Note: We use the Qualified Type Name as the Key because Types are not Hashable in Swift
      */
     @ThreadSafeSemaphore private var eventCallbacks = [String:[EventCallbackContainer]]()
+    @ThreadSafeSemaphore private var tokens = [UUID]()
     
     /**
      Invoke the appropriate Callback for the given Event
@@ -168,6 +147,9 @@ open class EventThread: EventReceiver, EventThreadable {
         
         dispatcher.addReceiver(self, forEventType: forEventType)
         
+        _tokens.withLock { tokens in
+            tokens.append(callbackContainer!.token)
+        }
         return callbackContainer!.token
     }
     
@@ -236,9 +218,10 @@ open class EventThread: EventReceiver, EventThreadable {
      */
     internal func registerWrappedListeners() {
         let mirror = Mirror(reflecting: self)
+        
         for child in mirror.children {
-            if var child = child.value as? (any ThreadEventMethodContainer) {
-                child.owner = self
+            if var typedValue = child.value as? (any ThreadEventMethodContainer) {
+                typedValue.prepare(owner: self)
             }
         }
     }
@@ -264,12 +247,18 @@ open class EventThread: EventReceiver, EventThreadable {
      - Author: Simon J. Stuart
      - Version: 4.1.0
      */
-    deinit {
-        let mirror = Mirror(reflecting: self)
-        for child in mirror.children {
-            if var child = child.value as? (any ThreadEventMethodContainer) {
-                child.unregister()
-            }
+    open func unregisterWrappedListeners() {
+        var snapTokens = [UUID]()
+        _tokens.withLock { tokens in
+            snapTokens = tokens
+            tokens.removeAll()
         }
+        for token in snapTokens {
+            removeEventCallback(token: token)
+        }
+    }
+    
+    deinit {
+        unregisterWrappedListeners()
     }
 }

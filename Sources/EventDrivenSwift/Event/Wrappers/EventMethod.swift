@@ -20,11 +20,9 @@ public protocol EventMethodContainer {
     associatedtype TEventType: Eventable
     associatedtype TOwner: AnyObject
     
-    var wrappedValue: EventMethodTypedEventCallback<TOwner, TEventType> { get set }
+    var wrappedValue: EventMethodTypedEventCallback<TOwner, TEventType>? { get set }
     
-    var owner: AnyObject? { get set }
-    
-    mutating func unregister()
+    mutating func prepare(owner: AnyObject)
 }
 
 /**
@@ -34,57 +32,29 @@ public protocol EventMethodContainer {
  */
 @propertyWrapper
 public struct EventMethod<TOwner: AnyObject, TEventType: Eventable>: EventMethodContainer {
-    mutating public func unregister() {
-        lock.wait()
-        if token != nil {
-            TEventType.removeListener(token!)
-            token = nil
-        }
-        lock.signal()
-    }
+    public var wrappedValue: EventMethodTypedEventCallback<TOwner, TEventType>?
+    public var executeOn: ExecuteEventOn
     
-    private var token: UUID? = nil
-    private var lock = DispatchSemaphore(value: 1)
-    
-    public var wrappedValue: EventMethodTypedEventCallback<TOwner, TEventType> {
-        didSet {
-            reRegsiterListener()
-        }
-    }
-    public var executeOn: ExecuteEventOn {
-        didSet {
-            reRegsiterListener()
-        }
-    }
-    
-    public var owner: AnyObject? {
-        didSet {
-            reRegsiterListener()
-        }
-    }
+    private weak var owner: AnyObject? = nil
     
     private func callback(event: TEventType, priority: EventPriority) {
         if let typedOwner = owner as? TOwner {
-            wrappedValue(typedOwner, event, priority)
+            wrappedValue?(typedOwner, event, priority)
         }
     }
     
-    mutating private func reRegsiterListener() {
-        lock.wait()
-        if token != nil {
-            TEventType.removeListener(token!)
-        }
-        if owner != nil {
-            token = TEventType.addListener(
-                owner,
+    public init(wrappedValue: EventMethodTypedEventCallback<TOwner, TEventType>?, executeOn: ExecuteEventOn = .requesterThread) {
+        self.wrappedValue = wrappedValue
+        self.executeOn = executeOn
+    }
+    
+    mutating public func prepare(owner: AnyObject) {
+        if let typedOwner = owner as? TOwner {
+            self.owner = owner
+            TEventType.addListener(
+                typedOwner,
                 callback,
                 executeOn: executeOn)
         }
-        lock.signal()
-    }
-    
-    public init(wrappedValue: @escaping EventMethodTypedEventCallback<TOwner, TEventType>, executeOn: ExecuteEventOn = .requesterThread) {
-        self.wrappedValue = wrappedValue
-        self.executeOn = executeOn
     }
 }

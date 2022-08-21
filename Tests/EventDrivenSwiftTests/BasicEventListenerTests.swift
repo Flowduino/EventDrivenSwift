@@ -57,7 +57,6 @@ final class BasicEventListenerTests: XCTestCase, EventListening {
         XCTAssertEqual(self.myFoo, testOne.foo, "Expect new value of eventThread.foo to be \(testOne.foo), but it's \(self.myFoo)")
         
         TestEventTypeOne.removeListener(listenerToken!)
-        unregisterListeners()
     }
     
     func testEventListenerOnTaskThread() throws {
@@ -76,6 +75,5 @@ final class BasicEventListenerTests: XCTestCase, EventListening {
         XCTAssertEqual(self.myFoo, testOne.foo, "Expect new value of eventThread.foo to be \(testOne.foo), but it's \(self.myFoo)")
         
         TestEventTypeOne.removeListener(listenerToken!)
-        unregisterListeners()
     }
 }

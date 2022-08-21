@@ -127,7 +127,7 @@ open class EventHandler: ObservableThread, EventHandling {
         var eventStacks = [EventPriority:[any Eventable]]()
         _stacks.withLock { stacks in
             eventStacks = stacks
-            stacks.removeAll(keepingCapacity: true)
+            stacks.removeAll()
         }
         
         for priority in EventPriority.inOrder {
@@ -147,7 +147,7 @@ open class EventHandler: ObservableThread, EventHandling {
         var eventQueues = [EventPriority:[any Eventable]]()
         _queues.withLock { queues in
             eventQueues = queues
-            queues.removeAll(keepingCapacity: true)
+            queues.removeAll()
         }
         
         for priority in EventPriority.inOrder {
@@ -173,7 +173,7 @@ open class EventHandler: ObservableThread, EventHandling {
      - Version: 1.0.0
      */
     public override func main() {
-        while isExecuting {
+        while isExecuting && !isCancelled {
             eventsPending.wait() // This will make the Thread effectively "sleep" until there are Events pending
             processAllEvents() // Once there's at least one Event waiting, we will Process it/them.
         }

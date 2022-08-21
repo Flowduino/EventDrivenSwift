@@ -23,13 +23,6 @@ public protocol EventListening: AnyObject {
      ````
      */
     func registerListeners()
-    
-    /**
-     Invoke this method to automatically unregister any Event Listener callback bearing the `@EventMethod` wrapper.
-     - Author: Simon J. Stuart
-     - Version: 4.1.0
-     */
-    func unregisterListeners()
 }
 
 /**
@@ -42,16 +35,7 @@ public extension EventListening {
         let mirror = Mirror(reflecting: self)
         for child in mirror.children {
             if var child = child.value as? (any EventMethodContainer) {
-                child.owner = self
-            }
-        }
-    }
-    
-    func unregisterListeners() {
-        let mirror = Mirror(reflecting: self)
-        for child in mirror.children {
-            if var child = child.value as? (any EventMethodContainer) {
-                child.unregister()
+                child.prepare(owner: self)
             }
         }
     }
