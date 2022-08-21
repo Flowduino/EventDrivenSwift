@@ -32,13 +32,9 @@ final class BasicEventThreadTests: XCTestCase {
         @EventMethod<TestEventThread, TestEventTypeTwo>
         private var eventMethodTest = {
             (self, event: TestEventTypeTwo, priority: EventPriority) in
-            self.onEventTwo(self, event, priority)
-        }
-        
-        private func onEventTwo(_ self: TestEventThread, _ event: TestEventTypeTwo, _ priority: EventPriority) {
             print("onTestEvent: bar = \(event.bar)")
         }
-        
+                
         var token: UUID? = nil
         
         override func registerEventListeners() {

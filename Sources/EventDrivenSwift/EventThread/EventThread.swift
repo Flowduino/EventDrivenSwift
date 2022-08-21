@@ -51,7 +51,7 @@ open class EventThread: EventReceiver, EventThreadable {
     public struct EventMethod<TOwner: EventThread, TEventType: Eventable>: ThreadEventMethodContainer {
         public var wrappedValue: EventMethodTypedEventCallback<TOwner, TEventType>?
         
-        private var owner: AnyObject? = nil
+        private weak var owner: AnyObject? = nil
         
         @inline(__always) private func callback(event: TEventType, priority: EventPriority) {
             if let typedOwner = owner as? TOwner {

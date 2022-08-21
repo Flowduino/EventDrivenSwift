@@ -60,7 +60,7 @@ final class BasicEventListenerTests: XCTestCase, EventListening {
     }
     
     func testEventListenerOnTaskThread() throws {
-        registerListeners()
+//        registerListeners()
         XCTAssertEqual(myFoo, 0, "Expect initial value of eventThread.foo to be 0, but it's \(myFoo)")
         
         listenerToken = TestEventTypeOne.addListener(self, { (event: TestEventTypeOne, priority) in
