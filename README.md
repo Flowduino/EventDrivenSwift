@@ -370,7 +370,7 @@ class TemperatureRatingViewModel: ObservableObject {
     @Published var temperatureInCelsius: Float
     @Published var temperatureRating: TemperatureRating
     
-    var listenerToken: UUID
+    var listenerHandle: EventListenerHandling?
     
     internal func onTemperatureRatingEvent(_ event: TemperatureRatingEvent, _ priority: EventPriority) {
         temperatureInCelsius = event.temperatureInCelsius
@@ -379,7 +379,7 @@ class TemperatureRatingViewModel: ObservableObject {
     
     init() {
         // Let's register our Event Listener Callback!
-        listenerToken = TemperatureRatingEvent.addListener(self, onTemperatureRatingEvent)
+        listenerHandle = TemperatureRatingEvent.addListener(self, onTemperatureRatingEvent)
     }
 }
 ```
@@ -393,22 +393,24 @@ Don't worry about managing the lifetime of your *Listener*! If the object which 
 
 If you need your *Event Callback* to execute on the *Listener's* Thread, as of Version 3.1.0... you can!
 ```swift
-listenerToken = TemperatureRatingEvent.addListener(self, onTemperatureRatingEvent, executeOn: .listenerThread)
+listenerHandle = TemperatureRatingEvent.addListener(self, onTemperatureRatingEvent, executeOn: .listenerThread)
 ```
 **Remember:** When executing an *Event Callback* on `.listenerThread`, you will need to ensure that your *Callback* and all resources that it uses are 100% Thread-Safe!
 **Important:** Executing the *Event Callback* on `.listnerThread` can potentially delay the invocation of other *Event Callbacks*. Only use this option when it is necessary.
 
 You can also execute your *Event Callback* on an ad-hoc `Task`:
 ```swift
-listenerToken = TemperatureRatingEvent.addListener(self, onTemperatureRatingEvent, executeOn: .taskThread)
+listenerHandle = TemperatureRatingEvent.addListener(self, onTemperatureRatingEvent, executeOn: .taskThread)
 ```
 **Remember:** When executing an *Event Callback* on `.taskThread`, you will need to ensure that your *Callback* and all resources that it uses are 100% Thread-Safe!
 
-Another thing to note about the above example is the `listenerToken`. Whenever you register a *Listener*, it will return a Unique Universal ID (a `UUID`) value. You can use this value to *Unregister* your *Listener* at any time:
+Another thing to note about the above example is the `listenerHandle`. Whenever you register a *Listener*, it will return an `EventListenerHandling` object. You can use this value to *Unregister* your *Listener* at any time:
 ```swift
-    TemperatureRatingEvent.removeListener(listenerToken)
+    listenerHandle.remove()
 ```
-This way, when an *Event* is no longer relevant to your code, you can simply call `removeListener` against the `Eventable` type, and pass in the token returned when you added the *Listener* in the first place.
+This will remove your *Listener Callback*, meaning it will no longer be invoked any time a `TemperatureRatingEvent` is *Dispatched*.
+
+**Note:** This is an improvement for Version 4.1.0, as opposed to the use of an untyped `UUID` from previous versions.
 
 `EventListener`s are an extremely versatile and very powerful addition to `EventDrivenSwift`.
 
