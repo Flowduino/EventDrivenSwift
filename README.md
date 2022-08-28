@@ -130,7 +130,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/Flowduino/EventDrivenSwift.git",
-            .upToNextMajor(from: "4.0.0")
+            .upToNextMajor(from: "4.2.0")
         ),
     ],
     //...
@@ -190,6 +190,19 @@ Above would again be with `.normal` *Priority*...
 temperatureEvent.stack(priority: .highest)
 ```
 Above would be with `.highest` *Priority*.
+
+### Scheduled *Dispatching* of an *Event*
+Version 4.2.0 introduced *Scheduled Dispatch* into the library:
+```swift
+temperatureEvent.scheduleQueue(at: DispatchTime.now() + TimeInterval().advanced(by: 4), priority: .highest)
+```
+The above would *Dispatch* the `temperatureEvent` after 4 seconds, via the *Queue*, with the *highest Priority*
+```swift
+temperatureEvent.scheduleStack(at: DispatchTime.now() + TimeInterval().advanced(by: 4), priority: .highest)
+```
+The above would *Dispatch* the `temperatureEvent` after 4 seconds, via the *Stack*, with the *highest Priority*
+
+*Scheduled Event Dispatch* is a massive advantage when your use-case requires a fixed or calculated time delay between the composition of an *Event*, and its *Dispatch* for processing. 
 
 ### Defining an `EventThread`
 So, we have an *Event* type, and we are able to *Dispatch* it through a *Queue* or a *Stack*, with whatever *Priority* we desire. Now we need to define an `EventThread` to listen for and process our `TemperatureEvent`s.
@@ -443,12 +456,9 @@ The above example would use the `EventPoolLowestLoadBalancer` implementation, wh
 ## Features Coming Soon
 `EventDrivenSwift` is an evolving and ever-improving Library, so here are lists of the features you can expect in future releases.
 
-Version 4.2.0 (or 5.0.0 if interface-breaking changes are required):
+Version 4.3.0 (or 5.0.0 if interface-breaking changes are required):
 - **Event Pool Scalers** - Dynamic Scaling for `EventPool` instances will be fully-implemented
 - **Latest-Only Events** - A Dispatch option to replace any unprocessed (older) *Events* with the newest *Event* of that specific *Eventable* type. This will be useful for things like sensor readings, where you only care about the most recent value possible (because older values are no longer relevant)
-
-Version 5.1.0 (or 6.0.0 if interface-breaking changes are required):
-- **Event Scheduling** - A Dispatch Scheduler to ensure that *Events* aren't Dispatched until a specific time (or after a specific interval)
 
 ## License
 
