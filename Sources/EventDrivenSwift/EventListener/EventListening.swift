@@ -8,6 +8,11 @@
 
 import Foundation
 
+/**
+ Apply `EventListening` to any `Class` intent on listening for `Eventable`s to register `@EventMethod`-decorated (immutable) Listeners via Reflection.
+ - Author: Simon J. Stuart
+ - Version: 4.1.0
+ */
 public protocol EventListening: AnyObject {
     /**
      Invoke this method to automatically register any Event Listener callback bearing the `@EventMethod` wrapper.
