@@ -89,4 +89,24 @@ public protocol EventCentralable {
         - typeOf: The Event Type for which the Listener identified by the given `token` is interested
      */
     static func removeListener(_ token: UUID, typeOf: Eventable.Type)
+    
+    /**
+     Schedule the Event to be dispatched through the Central Queue with the given `priority`
+     - Author: Simon J. Stuart
+     - Version: 4.2.0
+     - Parameters:
+        - at: The `DispatchTime` after which to dispatch the Event
+        - priority: The `EventPriority` with which to process the Event
+     */
+    static func scheduleQueue(_ event: Eventable, at: DispatchTime, priority: EventPriority)
+    
+    /**
+     Schedule the Event to be dispatched through the Central Stack with the given `priority`
+     - Author: Simon J. Stuart
+     - Version: 4.2.0
+     - Parameters:
+        - at: The `DispatchTime` after which to dispatch the Event
+        - priority: The `EventPriority` with which to process the Event
+     */
+    static func scheduleStack(_ event: Eventable, at: DispatchTime, priority: EventPriority)
 }

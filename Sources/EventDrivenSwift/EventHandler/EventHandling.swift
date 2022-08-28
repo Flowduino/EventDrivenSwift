@@ -35,6 +35,26 @@ public protocol EventHandling {
     func stackEvent(_ event: any Eventable, priority: EventPriority)
     
     /**
+     Schedule the Event to be dispatched with the given `priority`
+     - Author: Simon J. Stuart
+     - Version: 4.2.0
+     - Parameters:
+        - at: The `DispatchTime` after which to dispatch the Event
+        - priority: The `EventPriority` with which to process the Event
+     */
+    func scheduleQueue(_ event: any Eventable, at: DispatchTime, priority: EventPriority)
+    
+    /**
+     Schedule the Event to be dispatched with the given `priority`
+     - Author: Simon J. Stuart
+     - Version: 4.2.0
+     - Parameters:
+        - at: The `DispatchTime` after which to dispatch the Event
+        - priority: The `EventPriority` with which to process the Event
+     */
+    func scheduleStack(_ event: any Eventable, at: DispatchTime, priority: EventPriority)
+    
+    /**
      The number of Events currently pending in the Queue and Stack combined
      - Author: Simon J. Stuart
      - Version: 1.0.0

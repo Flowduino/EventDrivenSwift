@@ -93,6 +93,23 @@ open class EventHandler: ObservableThread, EventHandling {
         eventsPending.signal()
     }
     
+    public func scheduleQueue(_ event: any Eventable, at: DispatchTime, priority: EventPriority) {
+        Task {
+            DispatchQueue.main.asyncAfter(deadline: at) {
+                self.queueEvent(event, priority: priority)
+            }
+        }
+    }
+    
+    public func scheduleStack(_ event: any Eventable, at: DispatchTime, priority: EventPriority) {
+        Task {
+            DispatchQueue.main.asyncAfter(deadline: at) {
+                self.stackEvent(event, priority: priority)
+            }
+        }
+    }
+    
+    
     /**
      Processes an Event
      - Author: Simon J. Stuart

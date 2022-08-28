@@ -35,6 +35,26 @@ public protocol Eventable {
     func stack(priority: EventPriority)
     
     /**
+     Schedule the Event to be dispatched through the Central Queue with the given `priority`
+     - Author: Simon J. Stuart
+     - Version: 4.2.0
+     - Parameters:
+        - at: The `DispatchTime` after which to dispatch the Event
+        - priority: The `EventPriority` with which to process the Event
+     */
+    func scheduleQueue(at: DispatchTime, priority: EventPriority)
+    
+    /**
+     Schedule the Event to be dispatched through the Central Stack with the given `priority`
+     - Author: Simon J. Stuart
+     - Version: 4.2.0
+     - Parameters:
+        - at: The `DispatchTime` after which to dispatch the Event
+        - priority: The `EventPriority` with which to process the Event
+     */
+    func scheduleStack(at: DispatchTime, priority: EventPriority)
+    
+    /**
      Registers an Event Listner Callback for the given `Eventable` Type with the Central Event Listener
      - Author: Simon J. Stuart
      - Version: 3.0.0
@@ -74,12 +94,20 @@ extension Eventable {
  - Version: 1.0.0
  */
 extension Eventable {
-    public func queue(priority: EventPriority = .normal) {
+    @inline(__always) public func queue(priority: EventPriority = .normal) {
         EventCentral.queueEvent(self, priority: priority)
     }
     
-    public func stack(priority: EventPriority = .normal) {
+    @inline(__always) public func stack(priority: EventPriority = .normal) {
         EventCentral.stackEvent(self, priority: priority)
+    }
+    
+    @inline(__always) public func scheduleQueue(at: DispatchTime, priority: EventPriority = .normal) {
+        EventCentral.scheduleQueue(self, at: at, priority: priority)
+    }
+    
+    @inline(__always) public func scheduleStack(at: DispatchTime, priority: EventPriority = .normal) {
+        EventCentral.scheduleStack(self, at: at, priority: priority)
     }
     
     @discardableResult static public func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, executeOn: ExecuteEventOn = .requesterThread) -> EventListenerHandling {
