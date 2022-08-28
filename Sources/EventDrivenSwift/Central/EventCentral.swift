@@ -16,6 +16,7 @@ Singleton for the Central Event Dispatcher.
  - Note: This is used when invoking the `queue` and `stack` methods of `Eventable`.
  */
 final public class EventCentral: EventDispatcher, EventCentralable {
+    
     /**
      Singleton Instance of our Central Event Dispatcher
      - Author: Simon J. Stuart
@@ -84,6 +85,14 @@ final public class EventCentral: EventDispatcher, EventCentralable {
     
     @inline(__always) public static func removeListener(_ token: UUID, typeOf: Eventable.Type) {
         _shared.eventListener.removeListener(token, typeOf: typeOf)
+    }
+    
+    @inline(__always) static public func scheduleQueue(_ event: Eventable, at: DispatchTime, priority: EventPriority) {
+        _shared.scheduleQueue(event, at: at, priority: priority)
+    }
+    
+    @inline(__always) static public func scheduleStack(_ event: Eventable, at: DispatchTime, priority: EventPriority) {
+        _shared.scheduleStack(event, at: at, priority: priority)
     }
     
     /// This just makes it so that your code cannot initialise instances of `EventCentral`. It's a Singleton!
