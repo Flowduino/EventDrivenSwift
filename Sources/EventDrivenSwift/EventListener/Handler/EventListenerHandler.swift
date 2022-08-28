@@ -33,6 +33,7 @@ public class EventListenerHandler: EventListenerHandling {
     }
     
     public init(eventListenable: EventListenable, token: UUID) {
+        self.eventListenable = eventListenable
         self.token = token
     }
 }

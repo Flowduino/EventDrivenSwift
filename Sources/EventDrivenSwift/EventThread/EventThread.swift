@@ -33,6 +33,7 @@ public protocol ThreadEventMethodContainer {
  */
 open class EventThread: EventReceiver, EventThreadable {
     public typealias EventMethodTypedEventCallback<TOwner: EventThread, TEvent: Any> = (_ sender: TOwner, _ event: TEvent, _ priority: EventPriority) -> ()
+    
     /**
      Property Wrapper to simplify the registration of Event Callbacks in `EventThread`-inheriting types.
      - Author: Simon J. Stuart
@@ -71,6 +72,34 @@ open class EventThread: EventReceiver, EventThreadable {
         }
     }
     
+    open class EventCallbackHandler {
+        /**
+         `weak` reference to the `EventThread` against which this Callback is registered.
+         - Author: Simon J. Stuart
+         - Version: 4.1.0
+         */
+        private weak var eventThread: EventThread?
+        
+        /**
+         This is the Token Key assoicated with your Callback
+         - Author: Simon J. Stuart
+         - Version: 4.1.0
+         */
+        private var token: UUID
+        
+        public func remove() {
+            eventThread?.removeEventCallback(token: token)
+        }
+        
+        public init(eventThreadable: EventThread, token: UUID) {
+            self.eventThread = eventThreadable
+            self.token = token
+        }
+    }
+    
+    /**
+     If this `EventThread` was spawned by an `EventPool`, this is a `weak` reference to that `EventPool`.
+     */
     weak var eventPool: EventPooling?
     
     /**
@@ -121,10 +150,10 @@ open class EventThread: EventReceiver, EventThreadable {
      - Parameters:
         - callback: The code to invoke for the given `Eventable` Type
         - forEventType: The `Eventable` Type for which to Register  the Callback
-     - Returns: A `UUID` representing a unique `token` for this Event Callback. This can be used with `removeEventCallback`
+     - Returns: An `EventCallbackHandler` so that you can safely remove the Callback whenever you require.
      - Note: Version 4.1.0 adds support for multiple Callbacks per Event Type
      */
-    @discardableResult open func addEventCallback<TEvent: Eventable>(_ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type) -> UUID {
+    @discardableResult open func addEventCallback<TEvent: Eventable>(_ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type) -> EventCallbackHandler {
         let eventTypeName = String(reflecting: forEventType)
         var callbackContainer: EventCallbackContainer? = nil
         
@@ -150,7 +179,8 @@ open class EventThread: EventReceiver, EventThreadable {
         _tokens.withLock { tokens in
             tokens.append(callbackContainer!.token)
         }
-        return callbackContainer!.token
+        
+        return EventCallbackHandler(eventThreadable: self, token: callbackContainer!.token)
     }
     
     /**

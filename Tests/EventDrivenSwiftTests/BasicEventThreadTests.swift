@@ -35,19 +35,19 @@ final class BasicEventThreadTests: XCTestCase {
             print("onTestEvent: bar = \(event.bar)")
         }
                 
-        var token: UUID? = nil
+        var token: EventCallbackHandler? = nil
         
         override func registerEventListeners() {
             token = addEventCallback(self.eventOneCallback, forEventType: TestEventTypeOne.self)
         }
         
         public func unregisterAllListenersNow() {
-            removeEventCallback(token: token!)
+            token?.remove()
             unregisterWrappedListeners()
         }
         
         deinit {
-            removeEventCallback(token: token!)
+            token?.remove()
         }
         
         public func reg() {
