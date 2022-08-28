@@ -43,7 +43,9 @@ public protocol Eventable {
         - callback: The code to invoke for the given `Eventable` Type
      - Returns: A `UUID` value representing the `token` associated with this Event Callback
      */
-    @discardableResult static func addListener<TEvent: Eventable>(_ requester: AnyObject, _ callback: @escaping TypedEventCallback<TEvent>, executeOn: ExecuteEventOn) -> UUID
+    @discardableResult static func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, executeOn: ExecuteEventOn) -> EventListenerHandling
+    
+//    @discardableResult static func addListener(_ requester: AnyObject?, _ eventType: any Eventable.Type, _ callback: @escaping TypedEventCallback<any Eventable.Type>, executeOn: ExecuteEventOn) -> UUID
     
     /**
      Locates and removes the given Listener `token` (if it exists) from the Central Event Listener
@@ -80,11 +82,12 @@ extension Eventable {
         EventCentral.stackEvent(self, priority: priority)
     }
     
-    @discardableResult static public func addListener<TEvent: Eventable>(_ requester: AnyObject, _ callback: @escaping TypedEventCallback<TEvent>, executeOn: ExecuteEventOn = .requesterThread) -> UUID {
+    @discardableResult static public func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, executeOn: ExecuteEventOn = .requesterThread) -> EventListenerHandling {
         return EventCentral.addListener(requester, callback, forEventType: Self.self, executeOn: executeOn)
     }
-    
+       
     public static func removeListener(_ token: UUID) {
         EventCentral.removeListener(token, typeOf: Self.self)
     }
 }
+

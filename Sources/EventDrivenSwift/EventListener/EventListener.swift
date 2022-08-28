@@ -80,7 +80,7 @@ open class EventListener: EventHandler, EventListenable {
         }
     }
     
-    @discardableResult public func addListener<TEvent: Eventable>(_ requester: AnyObject, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn = .requesterThread) -> UUID {
+    @discardableResult public func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn = .requesterThread) -> EventListenerHandling {
         let eventTypeName = String(reflecting: forEventType)
         let method: EventCallback = { event, priority in
             self.callTypedEventCallback(callback, forEvent: event, priority: priority)
@@ -95,7 +95,7 @@ open class EventListener: EventHandler, EventListenable {
         
         /// We automatically register the Listener with the Central Event Dispatcher
         EventCentral.shared.addReceiver(self, forEventType: forEventType)
-        return eventListenerContainer.token
+        return EventListenerHandler(eventListenable: self, token: eventListenerContainer.token)
     }
     
     public func removeListener(_ token: UUID) {
