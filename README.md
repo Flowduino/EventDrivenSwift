@@ -443,7 +443,7 @@ The above example would use the `EventPoolLowestLoadBalancer` implementation, wh
 ## Features Coming Soon
 `EventDrivenSwift` is an evolving and ever-improving Library, so here are lists of the features you can expect in future releases.
 
-Version 4.1.0 (or 5.0.0 if interface-breaking changes are required):
+Version 4.2.0 (or 5.0.0 if interface-breaking changes are required):
 - **Event Pool Scalers** - Dynamic Scaling for `EventPool` instances will be fully-implemented
 - **Latest-Only Events** - A Dispatch option to replace any unprocessed (older) *Events* with the newest *Event* of that specific *Eventable* type. This will be useful for things like sensor readings, where you only care about the most recent value possible (because older values are no longer relevant)
 
