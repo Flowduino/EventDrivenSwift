@@ -128,8 +128,8 @@ open class EventThread: EventReceiver, EventThreadable {
      - Version: 4.1.0
      - Note: Version 4.1.0 adds support for multiple Callbacks per Event Type
      */
-    override open func processEvent(_ event: any Eventable, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
-        let eventTypeName = String(reflecting: type(of: event))
+    override open func processEvent(_ event: EventDispatchContainer, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
+        let eventTypeName = event.event.getEventTypeName()
         var callbackContainer: [EventCallbackContainer]? = nil
 
         _eventCallbacks.withLock { eventCallbacks in
@@ -139,7 +139,7 @@ open class EventThread: EventReceiver, EventThreadable {
         if callbackContainer == nil { return } // If there is no Callback, we will just return!
 
         for callback in callbackContainer! {
-            callback.callback(event, priority)
+            callback.callback(event.event, priority)
         }
     }
     
@@ -154,7 +154,7 @@ open class EventThread: EventReceiver, EventThreadable {
      - Note: Version 4.1.0 adds support for multiple Callbacks per Event Type
      */
     @discardableResult open func addEventCallback<TEvent: Eventable>(_ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type) -> EventCallbackHandler {
-        let eventTypeName = String(reflecting: forEventType)
+        let eventTypeName = forEventType.getEventTypeName()
         var callbackContainer: EventCallbackContainer? = nil
         
         _eventCallbacks.withLock { eventCallbacks in

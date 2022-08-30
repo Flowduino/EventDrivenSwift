@@ -29,7 +29,7 @@ open class EventDispatcher: EventHandler, EventDispatching {
     @ThreadSafeSemaphore private var receivers = [String:[ReceiverContainer]]()
     
     public func addReceiver(_ receiver: any EventReceiving, forEventType: Eventable.Type) {
-        let eventTypeName = String(reflecting: forEventType)
+        let eventTypeName = forEventType.getEventTypeName()
         
         _receivers.withLock { receivers in
             var bucket = receivers[eventTypeName]
@@ -50,7 +50,7 @@ open class EventDispatcher: EventHandler, EventDispatching {
     }
     
     public func removeReceiver(_ receiver: any EventReceiving, forEventType: Eventable.Type) {
-        let eventTypeName = String(reflecting: forEventType)
+        let eventTypeName = forEventType.getEventTypeName()
         
         _receivers.withLock { receivers in
             var bucket = receivers[eventTypeName]
@@ -82,8 +82,8 @@ open class EventDispatcher: EventHandler, EventDispatching {
      - Author: Simon J. Stuart
      - Version: 1.0.0
      */
-    override open func processEvent(_ event: any Eventable, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
-        let eventTypeName = String(reflecting: type(of: event))
+    override open func processEvent(_ event: EventDispatchContainer, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
+        let eventTypeName = event.event.getEventTypeName()
         
         var snapReceivers = [String:[ReceiverContainer]]()
         

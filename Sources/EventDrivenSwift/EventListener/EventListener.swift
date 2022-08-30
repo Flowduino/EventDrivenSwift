@@ -28,6 +28,7 @@ open class EventListener: EventHandler, EventListenable {
         var callback: EventCallback
         var dispatchQueue: DispatchQueue?
         var executeOn: ExecuteEventOn = .requesterThread
+        var interestedIn: EventListenerInterest = .all
     }
     
     /**
@@ -47,8 +48,8 @@ open class EventListener: EventHandler, EventListenable {
         - dispatchMethod: The Means by which the Event was Dispatched
         - priority: The Priority given to the Event at the point of Dispatch
      */
-    override open func processEvent(_ event: any Eventable, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
-        let eventTypeName = String(reflecting: type(of: event))
+    override open func processEvent(_ event: EventDispatchContainer, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
+        let eventTypeName = event.event.getEventTypeName()
         var listeners: [EventListenerContainer]? = nil
 
         _eventListeners.withLock { eventListeners in
@@ -59,33 +60,36 @@ open class EventListener: EventHandler, EventListenable {
 
         for listener in listeners! {
             if listener.requester == nil { // If the Requester no longer exists...
-                removeListener(listener.token, typeOf: type(of: event)) // ... Unregister this Listener
+                removeListener(listener.token, typeOf: type(of: event.event)) // ... Unregister this Listener
                 continue // Skip this one
             }
+            
+            if listener.interestedIn == .latestOnly && event.dispatchTime < latestEventDispatchTime[event.event.getEventTypeName()]! { continue } // If this Listener is only interested in the Latest Event dispatched for this Event Type, and this Event is NOT the Latest... skip it!
+            
             switch listener.executeOn {
             case .requesterThread:
                 Task { // We raise a Task because we don't want the entire Listener blocked in the event the dispatchQueue is busy or blocked!
                     let dispatchQueue = listener.dispatchQueue ?? DispatchQueue.main
                     dispatchQueue.async {
-                        listener.callback(event, priority)
+                        listener.callback(event.event, priority)
                     }
                 }
             case .listenerThread:
-                listener.callback(event, priority)
+                listener.callback(event.event, priority)
             case .taskThread:
                 Task {
-                    listener.callback(event, priority)
+                    listener.callback(event.event, priority)
                 }
             }
         }
     }
     
-    @discardableResult public func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn = .requesterThread) -> EventListenerHandling {
-        let eventTypeName = String(reflecting: forEventType)
+    @discardableResult public func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn = .requesterThread, interestedIn: EventListenerInterest = .all) -> EventListenerHandling {
+        let eventTypeName = forEventType.getEventTypeName()
         let method: EventCallback = { event, priority in
             self.callTypedEventCallback(callback, forEvent: event, priority: priority)
         }
-        let eventListenerContainer = EventListenerContainer(requester: requester, callback: method, dispatchQueue: OperationQueue.current?.underlyingQueue, executeOn: executeOn)
+        let eventListenerContainer = EventListenerContainer(requester: requester, callback: method, dispatchQueue: OperationQueue.current?.underlyingQueue, executeOn: executeOn, interestedIn: interestedIn)
         _eventListeners.withLock { eventCallbacks in
             var bucket = eventCallbacks[eventTypeName]
             if bucket == nil { bucket = [EventListenerContainer]() } // Create a new bucket if there isn't already one!
@@ -111,7 +115,7 @@ open class EventListener: EventHandler, EventListenable {
     }
     
     public func removeListener(_ token: UUID, typeOf: Eventable.Type) {
-        let eventTypeName = String(reflecting: typeOf)
+        let eventTypeName = typeOf.getEventTypeName()
         
         removeListener(token, eventTypeName: eventTypeName)
     }

@@ -66,7 +66,7 @@ final public class EventCentral: EventDispatcher, EventCentralable {
             return _shared.eventCount
         }
     }
-    
+       
     private var _eventListener: EventListenable?
     internal var eventListener: EventListenable {
         get {
@@ -75,8 +75,8 @@ final public class EventCentral: EventDispatcher, EventCentralable {
         }
     }
     
-    @discardableResult @inline(__always) public static func addListener<TEvent>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn = .requesterThread) -> EventListenerHandling where TEvent : Eventable {
-        return _shared.eventListener.addListener(requester, callback, forEventType: forEventType, executeOn: executeOn)
+    @discardableResult @inline(__always) public static func addListener<TEvent>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn = .requesterThread, interestedIn: EventListenerInterest = .all) -> EventListenerHandling where TEvent : Eventable {
+        return _shared.eventListener.addListener(requester, callback, forEventType: forEventType, executeOn: executeOn, interestedIn: interestedIn)
     }
     
     @inline(__always) public static func removeListener(_ token: UUID) {
@@ -87,11 +87,11 @@ final public class EventCentral: EventDispatcher, EventCentralable {
         _shared.eventListener.removeListener(token, typeOf: typeOf)
     }
     
-    @inline(__always) static public func scheduleQueue(_ event: Eventable, at: DispatchTime, priority: EventPriority) {
+    @inline(__always) public static func scheduleQueue(_ event: Eventable, at: DispatchTime, priority: EventPriority) {
         _shared.scheduleQueue(event, at: at, priority: priority)
     }
     
-    @inline(__always) static public func scheduleStack(_ event: Eventable, at: DispatchTime, priority: EventPriority) {
+    @inline(__always) public static func scheduleStack(_ event: Eventable, at: DispatchTime, priority: EventPriority) {
         _shared.scheduleStack(event, at: at, priority: priority)
     }
     

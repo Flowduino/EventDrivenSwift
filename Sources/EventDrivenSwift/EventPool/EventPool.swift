@@ -31,7 +31,7 @@ open class EventPool<TEventThread: EventThreadable>: EventHandler, EventPooling 
     
     public func addReceiver(_ receiver: EventReceiving, forEventType: Eventable.Type) {
         if let eventThread = receiver as? EventThreadable { /// We must cast the `receiver` to `EventThreadable` safely
-            let eventTypeName = String(reflecting: forEventType)
+            let eventTypeName = forEventType.getEventTypeName()
             
             // We need to add the Thread into the Pool for this Event Type
             _pools.withLock { pools in
@@ -58,7 +58,7 @@ open class EventPool<TEventThread: EventThreadable>: EventHandler, EventPooling 
     
     public func removeReceiver(_ receiver: EventReceiving, forEventType: Eventable.Type) {
         if let eventThread = receiver as? EventThreadable { /// We must cast the `receiver` to `EventThreadable` safely
-            let eventTypeName = String(reflecting: forEventType)
+            let eventTypeName = forEventType.getEventTypeName()
             
             _pools.withLock { pools in
                 var bucket = pools[eventTypeName]
@@ -100,8 +100,8 @@ open class EventPool<TEventThread: EventThreadable>: EventHandler, EventPooling 
         //TODO: Implement Scaling + Culling here
     }
     
-    override open func processEvent(_ event: any Eventable, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
-        let eventTypeName = String(reflecting: type(of: event))
+    override open func processEvent(_ event: EventDispatchContainer, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
+        let eventTypeName = event.event.getEventTypeName()
         
         var snapPools = [String:[ThreadContainer]]()
         
@@ -127,9 +127,9 @@ open class EventPool<TEventThread: EventThreadable>: EventHandler, EventPooling 
         if targetThread != nil {
             switch dispatchMethod {
             case .stack:
-                targetThread!.stackEvent(event, priority: priority)
+                targetThread!.stackEvent(event.event, priority: priority)
             case .queue:
-                targetThread!.queueEvent(event, priority: priority)
+                targetThread!.queueEvent(event.event, priority: priority)
             }
         }
 
