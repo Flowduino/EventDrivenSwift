@@ -32,7 +32,7 @@ public protocol ThreadEventMethodContainer {
  - Note: Inherit from this to implement a discrete unit of code designed specifically to operate upon specific `Eventable` types containing information useful to its operation(s)
  */
 open class EventThread: EventReceiver, EventThreadable {
-    public typealias EventMethodTypedEventCallback<TOwner: EventThread, TEvent: Any> = (_ sender: TOwner, _ event: TEvent, _ priority: EventPriority) -> ()
+    public typealias EventMethodTypedEventCallback<TOwner: EventThread, TEvent: Any> = (_ sender: TOwner, _ event: TEvent, _ priority: EventPriority, _ dispatchTime: DispatchTime) -> ()
     
     /**
      Property Wrapper to simplify the registration of Event Callbacks in `EventThread`-inheriting types.
@@ -54,9 +54,9 @@ open class EventThread: EventReceiver, EventThreadable {
         
         private weak var owner: AnyObject? = nil
         
-        @inline(__always) private func callback(event: TEventType, priority: EventPriority) {
+        @inline(__always) private func callback(event: TEventType, priority: EventPriority, dispatchTime: DispatchTime) {
             if let typedOwner = owner as? TOwner {
-                wrappedValue?(typedOwner, event, priority)
+                wrappedValue?(typedOwner, event, priority, dispatchTime)
             }
         }
 
@@ -128,8 +128,8 @@ open class EventThread: EventReceiver, EventThreadable {
      - Version: 4.1.0
      - Note: Version 4.1.0 adds support for multiple Callbacks per Event Type
      */
-    override open func processEvent(_ event: any Eventable, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
-        let eventTypeName = String(reflecting: type(of: event))
+    override open func processEvent(_ event: EventDispatchContainer, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
+        let eventTypeName = event.event.getEventTypeName()
         var callbackContainer: [EventCallbackContainer]? = nil
 
         _eventCallbacks.withLock { eventCallbacks in
@@ -139,7 +139,7 @@ open class EventThread: EventReceiver, EventThreadable {
         if callbackContainer == nil { return } // If there is no Callback, we will just return!
 
         for callback in callbackContainer! {
-            callback.callback(event, priority)
+            callback.callback(event.event, priority, event.dispatchTime)
         }
     }
     
@@ -154,7 +154,7 @@ open class EventThread: EventReceiver, EventThreadable {
      - Note: Version 4.1.0 adds support for multiple Callbacks per Event Type
      */
     @discardableResult open func addEventCallback<TEvent: Eventable>(_ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type) -> EventCallbackHandler {
-        let eventTypeName = String(reflecting: forEventType)
+        let eventTypeName = forEventType.getEventTypeName()
         var callbackContainer: EventCallbackContainer? = nil
         
         _eventCallbacks.withLock { eventCallbacks in
@@ -163,8 +163,8 @@ open class EventThread: EventReceiver, EventThreadable {
                 bucket = [EventCallbackContainer]()
             }
             
-            callbackContainer = EventCallbackContainer(callback: { event, priority in
-                self.callTypedEventCallback(callback, forEvent: event, priority: priority)
+            callbackContainer = EventCallbackContainer(callback: { event, priority, dispatchTime in
+                self.callTypedEventCallback(callback, forEvent: event, priority: priority, dispatchTime: dispatchTime)
             }, eventType: forEventType)
             
             bucket!.append(callbackContainer!)
@@ -192,9 +192,9 @@ open class EventThread: EventReceiver, EventThreadable {
         - forEvent: The instance of the `Eventable` type to be processed
         - priority: The `EventPriority` with which the `forEvent` was dispatched
      */
-    @inline(__always) open func callTypedEventCallback<TEvent: Eventable>(_ callback: @escaping TypedEventCallback<TEvent>, forEvent: Eventable, priority: EventPriority) {
+    @inline(__always) open func callTypedEventCallback<TEvent: Eventable>(_ callback: @escaping TypedEventCallback<TEvent>, forEvent: Eventable, priority: EventPriority, dispatchTime: DispatchTime) {
         if let typedEvent = forEvent as? TEvent {
-            callback(typedEvent, priority)
+            callback(typedEvent, priority, dispatchTime)
         }
     }
     

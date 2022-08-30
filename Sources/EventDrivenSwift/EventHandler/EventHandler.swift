@@ -22,18 +22,36 @@ import Observable
  */
 open class EventHandler: ObservableThread, EventHandling {
     /**
+     A new Container to associate each Event with information about its Dispatch (such as Dispatch Time)
+     - Author: Simon J. Stuart
+     - Version: 4.3.0
+     - Note: This was added principally to support Latest-Only Event Listeners/Callbacks
+     */
+    public struct EventDispatchContainer {
+        var event: any Eventable
+        var dispatchTime: DispatchTime = DispatchTime.now()
+    }
+    
+    /**
     A Map of `EventPriority` against an Array of `Eventable` in that corresponding Queue
      - Author: Simon J. Stuart
      - Version: 1.0.0
     */
-    @ThreadSafeSemaphore internal var queues = [EventPriority:[any Eventable]]()
+    @ThreadSafeSemaphore internal var queues = [EventPriority:[EventDispatchContainer]]()
     
     /**
     A Map of `EventPriority` against an Array of `Eventable` in that corresponding Stack
      - Author: Simon J. Stuart
      - Version: 1.0.0
     */
-    @ThreadSafeSemaphore internal var stacks = [EventPriority:[any Eventable]]()
+    @ThreadSafeSemaphore internal var stacks = [EventPriority:[EventDispatchContainer]]()
+    
+    /**
+    Keeps track of the latest Dispatch Times for every `Eventable` type
+     - Author: Simon J. Stuart
+     - Version: 4.3.0
+     */
+    @ThreadSafeSemaphore internal var latestEventDispatchTime = [String:DispatchTime]()
     
     /**
      The number of Events currently pending in the Queue and Stack combined
@@ -47,8 +65,8 @@ open class EventHandler: ObservableThread, EventHandling {
             var stackCount: Int = 0
             var queueCount: Int = 0
             
-            var snapStacks = [EventPriority:[any Eventable]]() // Snapshot of the current Stacks
-            var snapQueues = [EventPriority:[any Eventable]]() // Snapshot of hte current Queues
+            var snapStacks = [EventPriority:[EventDispatchContainer]]() // Snapshot of the current Stacks
+            var snapQueues = [EventPriority:[EventDispatchContainer]]() // Snapshot of hte current Queues
             
             _stacks.withLock { stacks in // With the Lock
                 snapStacks = stacks // Grab a Snapshot
@@ -77,20 +95,40 @@ open class EventHandler: ObservableThread, EventHandling {
      */
     internal var eventsPending = DispatchSemaphore(value: 0)
     
-    public func queueEvent(_ event: any Eventable, priority: EventPriority = .normal) {
+    public func queueEvent(_ event: EventDispatchContainer, priority: EventPriority) {
         _queues.withLock { queues in
-            if queues[priority] == nil { queues[priority] = [any Eventable]() } // Create the empty Array if it doesn't exist
+            if queues[priority] == nil { queues[priority] = [EventDispatchContainer]() } // Create the empty Array if it doesn't exist
             queues[priority]!.append(event)
+        }
+        eventsPending.signal()
+    }
+        
+    public func queueEvent(_ event: any Eventable, priority: EventPriority = .normal) {
+        let eventDispatchContainer = EventDispatchContainer(event: event)
+        
+        _latestEventDispatchTime.withLock { eventDispatches in
+            eventDispatches[event.getEventTypeName()] = eventDispatchContainer.dispatchTime
+        }
+        
+        queueEvent(eventDispatchContainer, priority: priority)
+    }
+    
+    public func stackEvent(_ event: EventDispatchContainer, priority: EventPriority) {
+        _stacks.withLock { stacks in
+            if stacks[priority] == nil { stacks[priority] = [EventDispatchContainer]() } // Create the empty Array if it doesn't exist
+            stacks[priority]!.append(event)
         }
         eventsPending.signal()
     }
     
     public func stackEvent(_ event: any Eventable, priority: EventPriority = .normal) {
-        _stacks.withLock { stacks in
-            if stacks[priority] == nil { stacks[priority] = [any Eventable]() } // Create the empty Array if it doesn't exist
-            stacks[priority]!.append(event)
+        let eventDispatchContainer = EventDispatchContainer(event: event)
+        
+        _latestEventDispatchTime.withLock { eventDispatches in
+            eventDispatches[event.getEventTypeName()] = eventDispatchContainer.dispatchTime
         }
-        eventsPending.signal()
+        
+        stackEvent(eventDispatchContainer, priority: priority)
     }
     
     public func scheduleQueue(_ event: any Eventable, at: DispatchTime, priority: EventPriority) {
@@ -109,7 +147,6 @@ open class EventHandler: ObservableThread, EventHandling {
         }
     }
     
-    
     /**
      Processes an Event
      - Author: Simon J. Stuart
@@ -117,7 +154,7 @@ open class EventHandler: ObservableThread, EventHandling {
      - Parameters:
         - event: The Event to Process.
      */
-    open func processEvent(_ event: any Eventable, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
+    open func processEvent(_ event: EventDispatchContainer, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
         preconditionFailure("processEvent must be overriden!")
     }
     
@@ -128,7 +165,7 @@ open class EventHandler: ObservableThread, EventHandling {
      - Parameters:
         - events: The `Array` of `Eventable` objects
      */
-    @inline(__always) private func processEvents(_ events: [any Eventable], dispatchMethod: EventDispatchMethod, priority: EventPriority) {
+    @inline(__always) private func processEvents(_ events: [EventDispatchContainer], dispatchMethod: EventDispatchMethod, priority: EventPriority) {
         for event in events {
             processEvent(event, dispatchMethod: dispatchMethod, priority: priority)
         }
@@ -141,7 +178,7 @@ open class EventHandler: ObservableThread, EventHandling {
      */
     private func processEventStacks() {
         // We need to take a snapshot of the Stacks and empty them
-        var eventStacks = [EventPriority:[any Eventable]]()
+        var eventStacks = [EventPriority:[EventDispatchContainer]]()
         _stacks.withLock { stacks in
             eventStacks = stacks
             stacks.removeAll()
@@ -161,7 +198,7 @@ open class EventHandler: ObservableThread, EventHandling {
      */
     private func processEventQueues() {
         // We need to take a snapshot of the Queues and empty them
-        var eventQueues = [EventPriority:[any Eventable]]()
+        var eventQueues = [EventPriority:[EventDispatchContainer]]()
         _queues.withLock { queues in
             eventQueues = queues
             queues.removeAll()

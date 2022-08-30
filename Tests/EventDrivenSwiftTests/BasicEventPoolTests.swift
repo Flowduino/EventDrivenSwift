@@ -31,7 +31,7 @@ final class BasicEventPoolTests: XCTestCase {
     class PoolTestingThread: EventThread {
         override func registerEventListeners() {
             addEventCallback(
-                { (event: PoolTestingEvent, priority) in
+                { (event: PoolTestingEvent, priority, dispatchTime) in
                     Thread.sleep(forTimeInterval: 5)
                     PoolTestStatic.setValue(index: event.index, value: event.value)
                     Thread.sleep(forTimeInterval: 5)

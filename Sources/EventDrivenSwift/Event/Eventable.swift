@@ -63,9 +63,7 @@ public protocol Eventable {
         - callback: The code to invoke for the given `Eventable` Type
      - Returns: A `UUID` value representing the `token` associated with this Event Callback
      */
-    @discardableResult static func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, executeOn: ExecuteEventOn) -> EventListenerHandling
-    
-//    @discardableResult static func addListener(_ requester: AnyObject?, _ eventType: any Eventable.Type, _ callback: @escaping TypedEventCallback<any Eventable.Type>, executeOn: ExecuteEventOn) -> UUID
+    @discardableResult static func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, executeOn: ExecuteEventOn, interestedIn: EventListenerInterest) -> EventListenerHandling
     
     /**
      Locates and removes the given Listener `token` (if it exists) from the Central Event Listener
@@ -75,6 +73,20 @@ public protocol Eventable {
         - token: The Token of the Listener you wish to remove
      */
     static func removeListener(_ token: UUID)
+    
+    /**
+     Returns the Fully-Qualified Type Name for this Eventable Type
+     - Author: Simon J. Stuart
+     - Version: 4.3.0
+     */
+    func getEventTypeName() -> String
+    
+    /**
+     Returns the Fully-Qualified Type Name for this Eventable Type
+     - Author: Simon J. Stuart
+     - Version: 4.3.0
+     */
+    static func getEventTypeName() -> String
 }
 
 /**
@@ -110,8 +122,8 @@ extension Eventable {
         EventCentral.scheduleStack(self, at: at, priority: priority)
     }
     
-    @discardableResult static public func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, executeOn: ExecuteEventOn = .requesterThread) -> EventListenerHandling {
-        return EventCentral.addListener(requester, callback, forEventType: Self.self, executeOn: executeOn)
+    @discardableResult static public func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, executeOn: ExecuteEventOn = .requesterThread, interestedIn: EventListenerInterest = .all) -> EventListenerHandling {
+        return EventCentral.addListener(requester, callback, forEventType: Self.self, executeOn: executeOn, interestedIn: interestedIn)
     }
        
     public static func removeListener(_ token: UUID) {
@@ -119,3 +131,17 @@ extension Eventable {
     }
 }
 
+/**
+ Extension to provide central access to Event Type Names
+ - Author: Simon J. Stuart
+ - Version: 4.3.0
+ */
+extension Eventable {
+    @inline(__always) public func getEventTypeName() -> String {
+        return String(reflecting: type(of: self))
+    }
+    
+    @inline(__always) public static func getEventTypeName() -> String {
+        return String(reflecting: self)
+    }
+}

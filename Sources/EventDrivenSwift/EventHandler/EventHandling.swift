@@ -35,6 +35,26 @@ public protocol EventHandling {
     func stackEvent(_ event: any Eventable, priority: EventPriority)
     
     /**
+     Adds the given `event` to the Event Queue with the given `priority` retaining the original Dispatch Information
+     - Author: Simon J. Stuart
+     - Version: 4.3.0
+     - Parameters:
+        - event: The Event
+        - priority: The Priority of the Event
+     */
+    func queueEvent(_ event: EventHandler.EventDispatchContainer, priority: EventPriority)
+    
+    /**
+     Adds the given `event` to the Event Stack with the given `priority` retaining the original Dispatch Information
+     - Author: Simon J. Stuart
+     - Version: 4.3.0
+     - Parameters:
+        - event: The Event
+        - priority: The Priority of the Event
+     */
+    func stackEvent(_ event: EventHandler.EventDispatchContainer, priority: EventPriority)
+    
+    /**
      Schedule the Event to be dispatched with the given `priority`
      - Author: Simon J. Stuart
      - Version: 4.2.0

@@ -17,6 +17,8 @@ import Observable
  - Note: Inherit from this to implement a discrete unit of code designed specifically to operate upon specific `Eventable` types containing information useful to its operation(s)
  */
 open class EventListener: EventHandler, EventListenable {
+    public var interestedIn: EventListenerInterest = .all
+    
     /**
      Container for Event Listeners
      - Author: Simon J. Stuart
@@ -28,6 +30,7 @@ open class EventListener: EventHandler, EventListenable {
         var callback: EventCallback
         var dispatchQueue: DispatchQueue?
         var executeOn: ExecuteEventOn = .requesterThread
+        var interestedIn: EventListenerInterest = .all
     }
     
     /**
@@ -47,8 +50,8 @@ open class EventListener: EventHandler, EventListenable {
         - dispatchMethod: The Means by which the Event was Dispatched
         - priority: The Priority given to the Event at the point of Dispatch
      */
-    override open func processEvent(_ event: any Eventable, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
-        let eventTypeName = String(reflecting: type(of: event))
+    override open func processEvent(_ event: EventDispatchContainer, dispatchMethod: EventDispatchMethod, priority: EventPriority) {
+        let eventTypeName = event.event.getEventTypeName()
         var listeners: [EventListenerContainer]? = nil
 
         _eventListeners.withLock { eventListeners in
@@ -59,33 +62,36 @@ open class EventListener: EventHandler, EventListenable {
 
         for listener in listeners! {
             if listener.requester == nil { // If the Requester no longer exists...
-                removeListener(listener.token, typeOf: type(of: event)) // ... Unregister this Listener
+                removeListener(listener.token, typeOf: type(of: event.event)) // ... Unregister this Listener
                 continue // Skip this one
             }
+            
+            if listener.interestedIn == .latestOnly && event.dispatchTime < latestEventDispatchTime[event.event.getEventTypeName()]! { continue } // If this Listener is only interested in the Latest Event dispatched for this Event Type, and this Event is NOT the Latest... skip it!
+            
             switch listener.executeOn {
             case .requesterThread:
                 Task { // We raise a Task because we don't want the entire Listener blocked in the event the dispatchQueue is busy or blocked!
                     let dispatchQueue = listener.dispatchQueue ?? DispatchQueue.main
                     dispatchQueue.async {
-                        listener.callback(event, priority)
+                        listener.callback(event.event, priority, event.dispatchTime)
                     }
                 }
             case .listenerThread:
-                listener.callback(event, priority)
+                listener.callback(event.event, priority, event.dispatchTime)
             case .taskThread:
                 Task {
-                    listener.callback(event, priority)
+                    listener.callback(event.event, priority, event.dispatchTime)
                 }
             }
         }
     }
     
-    @discardableResult public func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn = .requesterThread) -> EventListenerHandling {
-        let eventTypeName = String(reflecting: forEventType)
-        let method: EventCallback = { event, priority in
-            self.callTypedEventCallback(callback, forEvent: event, priority: priority)
+    @discardableResult public func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn = .requesterThread, interestedIn: EventListenerInterest = .all) -> EventListenerHandling {
+        let eventTypeName = forEventType.getEventTypeName()
+        let method: EventCallback = { event, priority, dispatchTime in
+            self.callTypedEventCallback(callback, forEvent: event, priority: priority, dispatchTime: dispatchTime)
         }
-        let eventListenerContainer = EventListenerContainer(requester: requester, callback: method, dispatchQueue: OperationQueue.current?.underlyingQueue, executeOn: executeOn)
+        let eventListenerContainer = EventListenerContainer(requester: requester, callback: method, dispatchQueue: OperationQueue.current?.underlyingQueue, executeOn: executeOn, interestedIn: interestedIn)
         _eventListeners.withLock { eventCallbacks in
             var bucket = eventCallbacks[eventTypeName]
             if bucket == nil { bucket = [EventListenerContainer]() } // Create a new bucket if there isn't already one!
@@ -111,7 +117,7 @@ open class EventListener: EventHandler, EventListenable {
     }
     
     public func removeListener(_ token: UUID, typeOf: Eventable.Type) {
-        let eventTypeName = String(reflecting: typeOf)
+        let eventTypeName = typeOf.getEventTypeName()
         
         removeListener(token, eventTypeName: eventTypeName)
     }
@@ -151,9 +157,9 @@ open class EventListener: EventHandler, EventListenable {
         - forEvent: The instance of the `Eventable` type to be processed
         - priority: The `EventPriority` with which the `forEvent` was dispatched
      */
-    internal func callTypedEventCallback<TEvent: Eventable>(_ callback: @escaping TypedEventCallback<TEvent>, forEvent: Eventable, priority: EventPriority) {
+    internal func callTypedEventCallback<TEvent: Eventable>(_ callback: @escaping TypedEventCallback<TEvent>, forEvent: Eventable, priority: EventPriority, dispatchTime: DispatchTime) {
         if let typedEvent = forEvent as? TEvent {
-            callback(typedEvent, priority)
+            callback(typedEvent, priority, dispatchTime)
         }
     }
 }

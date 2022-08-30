@@ -13,14 +13,14 @@ import Foundation
  - Author: Simon J. Stuart
  - Version: 3.0.0
  */
-public typealias EventCallback = (_ event: any Eventable, _ priority: EventPriority) -> ()
+public typealias EventCallback = (_ event: any Eventable, _ priority: EventPriority, _ dispatchTime: DispatchTime) -> ()
 
 /**
  Convienience `typealias` used for Typed Event Callbacks
  - Author: Simon J. Stuart
  - Version: 3.0.0
  */
-public typealias TypedEventCallback<TEvent: Any> = (_ event: TEvent, _ priority: EventPriority) -> ()
+public typealias TypedEventCallback<TEvent: Any> = (_ event: TEvent, _ priority: EventPriority, _ dispatchTime: DispatchTime) -> ()
 
 public enum ExecuteEventOn {
     /**
@@ -61,7 +61,7 @@ public protocol EventListenable: AnyObject, EventReceiving {
         - executeOn: Tells the `EventListenable` whether to execute the Callback on the `requester`'s Thread, or the Listener's.
      - Returns: A `UUID` value representing the `token` associated with this Event Callback
      */
-    @discardableResult func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn) -> EventListenerHandling
+    @discardableResult func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn, interestedIn: EventListenerInterest) -> EventListenerHandling
     
     /**
      Locates and removes the given Listener `token` (if it exists)

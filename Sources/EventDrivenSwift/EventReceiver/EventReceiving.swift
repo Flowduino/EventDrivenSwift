@@ -14,5 +14,10 @@ import Foundation
  - Version: 1.0.0
  */
 public protocol EventReceiving: AnyObject, EventHandling {
-
+    /**
+     Declares whether this Receiver is interested in `.all` Events, or `.latestOnly`
+     - Author: Simon J. Stuart
+     - Version: 4.3.0
+     */
+    var interestedIn: EventListenerInterest { get set }
 }
