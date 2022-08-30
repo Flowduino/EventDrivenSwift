@@ -1,8 +1,9 @@
 //
-//  File.swift
-//  
+// EventListenerInterest.swift
+// Copyright (c) 2022, Flowduino
+// Authored by Simon J. Stuart on 11th August 2022
 //
-//  Created by Simon Stuart on 28/08/2022.
+// Subject to terms, restrictions, and liability waiver of the MIT License
 //
 
 import Foundation
