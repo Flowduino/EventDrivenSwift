@@ -13,14 +13,14 @@ import Foundation
  - Author: Simon J. Stuart
  - Version: 3.0.0
  */
-public typealias EventCallback = (_ event: any Eventable, _ priority: EventPriority) -> ()
+public typealias EventCallback = (_ event: any Eventable, _ priority: EventPriority, _ dispatchTime: DispatchTime) -> ()
 
 /**
  Convienience `typealias` used for Typed Event Callbacks
  - Author: Simon J. Stuart
  - Version: 3.0.0
  */
-public typealias TypedEventCallback<TEvent: Any> = (_ event: TEvent, _ priority: EventPriority) -> ()
+public typealias TypedEventCallback<TEvent: Any> = (_ event: TEvent, _ priority: EventPriority, _ dispatchTime: DispatchTime) -> ()
 
 public enum ExecuteEventOn {
     /**

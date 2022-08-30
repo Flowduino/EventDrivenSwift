@@ -8,7 +8,7 @@
 
 import Foundation
 
-public typealias EventMethodTypedEventCallback<TOwner: AnyObject, TEvent: Any> = (_ sender: TOwner, _ event: TEvent, _ priority: EventPriority) -> ()
+public typealias EventMethodTypedEventCallback<TOwner: AnyObject, TEvent: Any> = (_ sender: TOwner, _ event: TEvent, _ priority: EventPriority, _ dispatchTime: DispatchTime) -> ()
 
 /**
  Any Property wrapped with `EventMethod` will automatically conform to `EventMethodContainer`
@@ -28,7 +28,7 @@ public protocol EventMethodContainer {
 /**
  Decorate Typed Event Callback Closures as `var` with `@EventMethod<TEventType>` to automatically register them.
  - Author: Simon J. Stuart
- - Version: 4.1.0
+ - Version: 5.0.0
  */
 @propertyWrapper
 public struct EventMethod<TOwner: AnyObject, TEventType: Eventable>: EventMethodContainer {
@@ -37,9 +37,9 @@ public struct EventMethod<TOwner: AnyObject, TEventType: Eventable>: EventMethod
     
     private weak var owner: AnyObject? = nil
     
-    private func callback(event: TEventType, priority: EventPriority) {
+    private func callback(event: TEventType, priority: EventPriority, dispatchTime: DispatchTime) {
         if let typedOwner = owner as? TOwner {
-            wrappedValue?(typedOwner, event, priority)
+            wrappedValue?(typedOwner, event, priority, dispatchTime)
         }
     }
     

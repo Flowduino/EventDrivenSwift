@@ -7,7 +7,7 @@
 //
 
 import Foundation
-
+/*
 public protocol EventListenerCallbackContainer {
     associatedtype TEventType: Eventable
     
@@ -35,3 +35,4 @@ public struct EventListeners<TOwner: AnyObject> {
         return results
     }
 }
+*/

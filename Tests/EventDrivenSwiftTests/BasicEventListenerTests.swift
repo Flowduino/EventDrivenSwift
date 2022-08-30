@@ -18,7 +18,7 @@ final class BasicEventListenerTests: XCTestCase, EventListening {
         var bar: String
     }
        
-    @EventMethod<BasicEventListenerTests, TestEventTypeOne>(executeOn: .taskThread) var event1 = { (self, event: TestEventTypeOne, priority: EventPriority) in
+    @EventMethod<BasicEventListenerTests, TestEventTypeOne>(executeOn: .taskThread) var event1 = { (self, event: TestEventTypeOne, priority: EventPriority, dispatchTime: DispatchTime)  in
         self.doTestEvent(event: event, priority: priority)
     }
     
@@ -26,7 +26,7 @@ final class BasicEventListenerTests: XCTestCase, EventListening {
         print("onTestEvent: foo = \(event.foo)")
     }
     
-    @EventMethod<BasicEventListenerTests, TestEventTypeTwo>(executeOn: .taskThread) var event2 = { (self, event: TestEventTypeTwo, priority: EventPriority) in
+    @EventMethod<BasicEventListenerTests, TestEventTypeTwo>(executeOn: .taskThread) var event2 = { (self, event: TestEventTypeTwo, priority: EventPriority, dispatchTime: DispatchTime) in
         self.doTestEventTwo(event: event, priority: priority)
     }
     
@@ -43,7 +43,7 @@ final class BasicEventListenerTests: XCTestCase, EventListening {
         registerListeners()
         XCTAssertEqual(myFoo, 0, "Expect initial value of eventThread.foo to be 0, but it's \(myFoo)")
         
-        listenerHandler = TestEventTypeOne.addListener(self, { (event: TestEventTypeOne, priority) in
+        listenerHandler = TestEventTypeOne.addListener(self, { (event: TestEventTypeOne, priority, dispatchTime) in
             self.myFoo = event.foo
             self.awaiter.signal()
         }, executeOn: .listenerThread)
@@ -63,7 +63,7 @@ final class BasicEventListenerTests: XCTestCase, EventListening {
 //        registerListeners()
         XCTAssertEqual(myFoo, 0, "Expect initial value of eventThread.foo to be 0, but it's \(myFoo)")
         
-        listenerHandler = TestEventTypeOne.addListener(self, { (event: TestEventTypeOne, priority) in
+        listenerHandler = TestEventTypeOne.addListener(self, { (event: TestEventTypeOne, priority, dispatchTime) in
             self.myFoo = event.foo
             self.awaiter.signal()
         }, executeOn: .taskThread)

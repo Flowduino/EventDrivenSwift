@@ -130,7 +130,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/Flowduino/EventDrivenSwift.git",
-            .upToNextMajor(from: "4.2.0")
+            .upToNextMajor(from: "5.0.0")
         ),
     ],
     //...
@@ -217,7 +217,7 @@ class TemperatureProcessor: EventThread {
     }
     
     /// Define our Callback Function to process received TemperatureEvent Events
-    func onTemperatureEvent(_ event: TemperatureEvent, _ priority: EventPriority) {
+    func onTemperatureEvent(_ event: TemperatureEvent, _ priority: EventPriority, _ dispatchTime: DispatchTime) {
 
     }
 }
@@ -229,6 +229,8 @@ Firstly, `TemperatureProcessor` inherits from `EventThread`, which is where all 
 The function `registerEventListeners` will be called automatically when an instance of `TemperatureProcessor` is created. Within this method, we call `addEventCallback` to register `onTemperatureEvent` so that it will be invoked every time an *Event* of type `TemperatureEvent` is *Dispatched*.
 
 Our *Callback* (or *Handler* or *Listener Event*) is called `onTemperatureEvent`, which is where we will implement whatever *Operation* is to be performed against a `TemperatureEvent`.
+
+Version 5.0.0 introduces the new parameter, `dispatchTime`, which will always provide the `DispatchTime` reference at which the *Event* was *Dispatched*. You can use this to determine *Delta* (how much time has passed since the *Event* was *Dispatched*), which is particularly useful if you are performing interpolation and/or extrapolation.
 
 Now, let's actually do something with our `TemperatureEvent` in the `onTemperatureEvent` method.
 ```swift
@@ -262,7 +264,7 @@ Now, let's actually do something with our `TemperatureEvent` in the `onTemperatu
     @ThreadSafeSemaphore public var temperatureInCelsius: Float = Float.zero
     @ThreadSafeSemaphore public var temperatureRating: TemperatureRating = .freezing
     
-    func onTemperatureEvent(_ event: TemperatureEvent, _ priority: EventPriority) {
+    func onTemperatureEvent(_ event: TemperatureEvent, _ priority: EventPriority, _ dispatchTime: DispatchTime) {
         temperatureInCelsius = event.temperatureInCelsius
         temperatureRating = TemperatureRating.fromTemperature(event.temperatureInCelsius)
     }
@@ -315,7 +317,7 @@ protocol TemperatureProcessorObserver: AnyObject {
 ```
 Now let's modify the `onTemperatureEvent` method we implemented in the previous example:
 ```swift
-    func onTemperatureEvent(_ event: TemperatureEvent, _ priority: EventPriority) {
+    func onTemperatureEvent(_ event: TemperatureEvent, _ priority: EventPriority, _ dispatchTime: DispatchTime) {
         temperatureInCelsius = event.temperatureInCelsius
         temperatureRating = TemperatureRating.fromTemperature(event.temperatureInCelsius)
         
@@ -343,7 +345,7 @@ enum TemperatureRatingEvent: Eventable {
 ```
 With the *Event* type defined, we can now once more expand our `onTemperatureEvent` to *Dispatch* our reciprocal `TemperatureRatingEvent`:
 ```swift
-    func onTemperatureEvent(_ event: TemperatureEvent, _ priority: EventPriority) {
+    func onTemperatureEvent(_ event: TemperatureEvent, _ priority: EventPriority, _ dispatchTime: DispatchTime) {
         temperatureInCelsius = event.temperatureInCelsius
         temperatureRating = TemperatureRating.fromTemperature(event.temperatureInCelsius)
         
@@ -385,7 +387,7 @@ class TemperatureRatingViewModel: ObservableObject {
     
     var listenerHandle: EventListenerHandling?
     
-    internal func onTemperatureRatingEvent(_ event: TemperatureRatingEvent, _ priority: EventPriority) {
+    internal func onTemperatureRatingEvent(_ event: TemperatureRatingEvent, _ priority: EventPriority, _ dispatchTime: DispatchTime) {
         temperatureInCelsius = event.temperatureInCelsius
         temperatureRating = event.temperatureRating
     }
@@ -438,7 +440,7 @@ class TemperatureRatingViewModel: ObservableObject {
     
     var listenerHandle: EventListenerHandling?
     
-    internal func onTemperatureRatingEvent(_ event: TemperatureRatingEvent, _ priority: EventPriority) {
+    internal func onTemperatureRatingEvent(_ event: TemperatureRatingEvent, _ priority: EventPriority, _ dispatchTime: DispatchTime) {
         temperatureInCelsius = event.temperatureInCelsius
         temperatureRating = event.temperatureRating
     }
@@ -480,9 +482,8 @@ The above example would use the `EventPoolLowestLoadBalancer` implementation, wh
 ## Features Coming Soon
 `EventDrivenSwift` is an evolving and ever-improving Library, so here are lists of the features you can expect in future releases.
 
-Version 4.3.0 (or 5.0.0 if interface-breaking changes are required):
-- **Event Pool Scalers** - Dynamic Scaling for `EventPool` instances will be fully-implemented
-- **Latest-Only Events** - A Dispatch option to replace any unprocessed (older) *Events* with the newest *Event* of that specific *Eventable* type. This will be useful for things like sensor readings, where you only care about the most recent value possible (because older values are no longer relevant)
+Version 5.1.0 (or 6.0.0 if interface-breaking changes are required):
+- **Event Pool Scalers** - Dynamic Scaling for `EventPool` instances will be fully-implemented (for the moment, no automatic Scaling will occur, and you cannot change the scale of an *Event Pool* once it has been initialised)
 
 ## License
 

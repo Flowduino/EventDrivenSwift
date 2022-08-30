@@ -73,14 +73,14 @@ open class EventListener: EventHandler, EventListenable {
                 Task { // We raise a Task because we don't want the entire Listener blocked in the event the dispatchQueue is busy or blocked!
                     let dispatchQueue = listener.dispatchQueue ?? DispatchQueue.main
                     dispatchQueue.async {
-                        listener.callback(event.event, priority)
+                        listener.callback(event.event, priority, event.dispatchTime)
                     }
                 }
             case .listenerThread:
-                listener.callback(event.event, priority)
+                listener.callback(event.event, priority, event.dispatchTime)
             case .taskThread:
                 Task {
-                    listener.callback(event.event, priority)
+                    listener.callback(event.event, priority, event.dispatchTime)
                 }
             }
         }
@@ -88,8 +88,8 @@ open class EventListener: EventHandler, EventListenable {
     
     @discardableResult public func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn = .requesterThread, interestedIn: EventListenerInterest = .all) -> EventListenerHandling {
         let eventTypeName = forEventType.getEventTypeName()
-        let method: EventCallback = { event, priority in
-            self.callTypedEventCallback(callback, forEvent: event, priority: priority)
+        let method: EventCallback = { event, priority, dispatchTime in
+            self.callTypedEventCallback(callback, forEvent: event, priority: priority, dispatchTime: dispatchTime)
         }
         let eventListenerContainer = EventListenerContainer(requester: requester, callback: method, dispatchQueue: OperationQueue.current?.underlyingQueue, executeOn: executeOn, interestedIn: interestedIn)
         _eventListeners.withLock { eventCallbacks in
@@ -157,9 +157,9 @@ open class EventListener: EventHandler, EventListenable {
         - forEvent: The instance of the `Eventable` type to be processed
         - priority: The `EventPriority` with which the `forEvent` was dispatched
      */
-    internal func callTypedEventCallback<TEvent: Eventable>(_ callback: @escaping TypedEventCallback<TEvent>, forEvent: Eventable, priority: EventPriority) {
+    internal func callTypedEventCallback<TEvent: Eventable>(_ callback: @escaping TypedEventCallback<TEvent>, forEvent: Eventable, priority: EventPriority, dispatchTime: DispatchTime) {
         if let typedEvent = forEvent as? TEvent {
-            callback(typedEvent, priority)
+            callback(typedEvent, priority, dispatchTime)
         }
     }
 }

@@ -19,7 +19,7 @@ final class BasicEventSchedulingTests: XCTestCase {
     private var executed: DispatchTime? = nil
     
     func testPerformanceExample() throws {
-        TestEvent.addListener(self, { (event: TestEvent, priority) in
+        TestEvent.addListener(self, { (event: TestEvent, priority, dispatchTime) in
             print("TestEvent where foo = \(event.foo)")
             self.testValue = event.foo
             self.executed = DispatchTime.now()

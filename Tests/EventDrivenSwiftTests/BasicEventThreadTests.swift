@@ -23,7 +23,7 @@ final class BasicEventThreadTests: XCTestCase {
         @ThreadSafeSemaphore var foo: Int = 0
         public var awaiter = DispatchSemaphore(value: 0)
         
-        internal func eventOneCallback(_ event: TestEventTypeOne, _ priority: EventPriority) {
+        internal func eventOneCallback(_ event: TestEventTypeOne, _ priority: EventPriority, _ dispatchTime: DispatchTime) {
             print("eventOneCallback running")
             foo = event.foo
             awaiter.signal()
@@ -31,7 +31,7 @@ final class BasicEventThreadTests: XCTestCase {
         
         @EventMethod<TestEventThread, TestEventTypeTwo>
         private var eventMethodTest = {
-            (self, event: TestEventTypeTwo, priority: EventPriority) in
+            (self, event: TestEventTypeTwo, priority: EventPriority, dispatchTime: DispatchTime) in
             print("onTestEvent: bar = \(event.bar)")
         }
                 
