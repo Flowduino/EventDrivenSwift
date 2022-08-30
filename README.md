@@ -204,10 +204,8 @@ The above would *Dispatch* the `temperatureEvent` after 4 seconds, via the *Stac
 
 *Scheduled Event Dispatch* is a massive advantage when your use-case requires a fixed or calculated time delay between the composition of an *Event*, and its *Dispatch* for processing. 
 
-### Defining an `EventThread`
-So, we have an *Event* type, and we are able to *Dispatch* it through a *Queue* or a *Stack*, with whatever *Priority* we desire. Now we need to define an `EventThread` to listen for and process our `TemperatureEvent`s.
-
-**Note:** Code example in this section was updated for Version 2.0.0 due to considerable improvements, which necessitated changing the Interface slightly (for the better)
+### (Receiving & Processing Events - Method 1) Defining an `EventThread`
+So, we have an *Event* type, and we are able to *Dispatch* it through a *Queue* or a *Stack*, with whatever *Priority* we desire. Now we need a way to Receive our `*`TemperatureEvent`s so that we can do something with them. One way of doing this is to define an `EventThread` to listen for and process our `TemperatureEvent`s.
 
 ```swift
 class TemperatureProcessor: EventThread {
@@ -368,10 +366,10 @@ Now that we've walked through these basic Usage Examples, see if you can produce
 ## `UIEventThread`
 Version 2.0.0 introduced the `UIEventThread` base class, which operates exactly the same way as `EventThread`, with the notable difference being that your registered *Event* Callbacks will **always** be invoked on the `MainActor` (or "UI Thread"). You can simply inherit from `UIEventThread` instead of `EventThread` whenever it is imperative for one or more *Event* Callbacks to execute on the `MainActor`.
 
-## `EventListener`
-Version 3.0.0 introduced the `EventListener` concept to the Library.
+## (Receiving & Processing Events - Method 2) `EventListener`
+Version 3.0.0 introduced the `EventListener` concept to the Library. These are a universally-available means (available in any `class` you define) of *Receiving Events* dispatched from anywhere in your code, and require *considerably less code* to use.
 
-An `EventListener` is a universal way of subscribing to *Events*, anywhere in your code!
+An `EventListener` is a universal way of subscribing to *Events*, anywhere in your code, without having to define and operate within the constraints of an `EventThread`.
 
 By design, `EventDrivenSwift` provides a *Central Event Listener*, which is automatically initialized should any of your code register a *Listener* for an *Event* by reference to the `Eventable` type.
 
