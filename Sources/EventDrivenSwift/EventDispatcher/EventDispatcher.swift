@@ -102,6 +102,7 @@ open class EventDispatcher: EventHandler, EventDispatching {
             if receiver.receiver == nil { /// If the Recevier is `nil`...
                 continue
             }
+            if receiver.receiver!.interestedIn == .latestOnly && event.dispatchTime < latestEventDispatchTime[event.event.getEventTypeName()]! { continue } // If this Receiver is only interested in the Latest Event dispatched for this Event Type, and this Event is NOT the Latest... skip it!
             
             // so, we have a receiver... let's deal with it!
             switch dispatchMethod {

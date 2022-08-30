@@ -18,6 +18,8 @@ import ThreadSafeSwift
  - Note: Event Pools own and manage all instances of the given `TEventThread` type
  */
 open class EventPool<TEventThread: EventThreadable>: EventHandler, EventPooling {
+    public var interestedIn: EventListenerInterest = .all
+    
     @ThreadSafeSemaphore public var balancer: EventPoolBalancing
     @ThreadSafeSemaphore public var scaler: EventPoolScaling
     @ThreadSafeSemaphore public var capacity: UInt8

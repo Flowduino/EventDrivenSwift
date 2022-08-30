@@ -427,6 +427,30 @@ This will remove your *Listener Callback*, meaning it will no longer be invoked 
 
 `EventListener`s are an extremely versatile and very powerful addition to `EventDrivenSwift`.
 
+## `EventListener` with *Latest-Only* Interest
+Version 4.3.0 of this library introduces the concept of *Latest-Only Listeners*. A *Latest-Only Listener* is a *Listener* that will only be invoked for the very latest *Event* of its requested *Event Type*. If there are a number of older *Events* of this type pending in a Queue/Stack, they will simply be skipped over... and only the very *Latest* will invoke your *Listener*.
+
+We have made it incredibly simple for you to configure your *Listener* to be a *Latest-Only Listener*. Taking the previous code example, we can simply modify it as follows:
+```swift
+class TemperatureRatingViewModel: ObservableObject {
+    @Published var temperatureInCelsius: Float
+    @Published var temperatureRating: TemperatureRating
+    
+    var listenerHandle: EventListenerHandling?
+    
+    internal func onTemperatureRatingEvent(_ event: TemperatureRatingEvent, _ priority: EventPriority) {
+        temperatureInCelsius = event.temperatureInCelsius
+        temperatureRating = event.temperatureRating
+    }
+    
+    init() {
+        // Let's register our Event Listener Callback!
+        listenerHandle = TemperatureRatingEvent.addListener(self, onTemperatureRatingEvent, interestedIn: .latestOnly)
+    }
+}
+```
+By including the `interestedIn` optional parameter when invoking `addListener` against any `Eventable` type, and passing for this parameter a value of `.latestOnly`, we define that this *Listener* is only interested in the *Latest* `TemperatureRatingEvent` to be *Dispatched*. Should a number of `TemperatureRatingEvent`s build up in the Queue/Stack, the above-defined *Listener* will simply discard any older Events, and only invoke for the newest.
+
 ## `EventPool`
 Version 4.0.0 introduces the extremely powerful `EventPool` solution, making it possible to create managed groups of `EventThread`s, where inbound *Events* will be directed to the best `EventThread` in the `EventPool` at any given moment.
 

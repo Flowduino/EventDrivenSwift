@@ -17,6 +17,8 @@ import Observable
  - Note: Inherit from this to implement a discrete unit of code designed specifically to operate upon specific `Eventable` types containing information useful to its operation(s)
  */
 open class EventListener: EventHandler, EventListenable {
+    public var interestedIn: EventListenerInterest = .all
+    
     /**
      Container for Event Listeners
      - Author: Simon J. Stuart

@@ -20,5 +20,5 @@ import Observable
  - Note: `EventThread` inherits from this
  */
 open class EventReceiver: EventHandler, EventReceiving {
-
+    public var interestedIn: EventListenerInterest = .all
 }
