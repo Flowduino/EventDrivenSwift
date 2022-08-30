@@ -75,8 +75,8 @@ final public class EventCentral: EventDispatcher, EventCentralable {
         }
     }
     
-    @discardableResult @inline(__always) public static func addListener<TEvent>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn = .requesterThread, interestedIn: EventListenerInterest = .all) -> EventListenerHandling where TEvent : Eventable {
-        return _shared.eventListener.addListener(requester, callback, forEventType: forEventType, executeOn: executeOn, interestedIn: interestedIn)
+    @discardableResult @inline(__always) public static func addListener<TEvent>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn = .requesterThread, interestedIn: EventListenerInterest = .all, maximumAge: UInt64 = 0) -> EventListenerHandling where TEvent : Eventable {
+        return _shared.eventListener.addListener(requester, callback, forEventType: forEventType, executeOn: executeOn, interestedIn: interestedIn, maximumAge: maximumAge)
     }
     
     @inline(__always) public static func removeListener(_ token: UUID) {

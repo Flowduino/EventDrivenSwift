@@ -451,6 +451,32 @@ class TemperatureRatingViewModel: ObservableObject {
 ```
 By including the `interestedIn` optional parameter when invoking `addListener` against any `Eventable` type, and passing for this parameter a value of `.latestOnly`, we define that this *Listener* is only interested in the *Latest* `TemperatureRatingEvent` to be *Dispatched*. Should a number of `TemperatureRatingEvent`s build up in the Queue/Stack, the above-defined *Listener* will simply discard any older Events, and only invoke for the newest.
 
+## `EventListener` with *Maximum Age* Interest
+Version 5.1.0 of this library introduces the concent of *Maximum Age Listeners*. A *Maximum Age Listener* is a *Listener* that will only be invoked for *Events* of its registered *Event Type* that are younger than a defined *Maximum Age*. Any *Event* older than the defined *Maximum Age* will be skipped over, while any *Event* younger will invoke your *Listener*.
+
+We have made it simple for you to configure your *Listener* to define a *Maximum Age* interest. Taking the previous code example, we can simply modify it as follows:
+```swift
+class TemperatureRatingViewModel: ObservableObject {
+    @Published var temperatureInCelsius: Float
+    @Published var temperatureRating: TemperatureRating
+    
+    var listenerHandle: EventListenerHandling?
+    
+    internal func onTemperatureRatingEvent(_ event: TemperatureRatingEvent, _ priority: EventPriority, _ dispatchTime: DispatchTime) {
+        temperatureInCelsius = event.temperatureInCelsius
+        temperatureRating = event.temperatureRating
+    }
+    
+    init() {
+        // Let's register our Event Listener Callback!
+        listenerHandle = TemperatureRatingEvent.addListener(self, onTemperatureRatingEvent, interestedIn: .youngerThan, maximumAge: 1 * 1_000_000_000)
+    }
+}
+```
+In the above code example, `maximumAge` is a value defined in *nanoseconds*. With that in mind, `1 * 1_000_000_000` would be 1 second. This means that, any `TemperatureRatingEvent` older than 1 second would be ignored by the *Listener*, while any `TemperatureRatingEvent` *younger* than 1 second would invoke the `onTemperatureRatingEvent` method.
+
+This functionality is very useful when the context of an *Event*'s usage would have a known, fixed expiry.
+
 ## `EventPool`
 Version 4.0.0 introduces the extremely powerful `EventPool` solution, making it possible to create managed groups of `EventThread`s, where inbound *Events* will be directed to the best `EventThread` in the `EventPool` at any given moment.
 

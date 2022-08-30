@@ -17,6 +17,8 @@ import Observable
  - Note: Inherit from this to implement a discrete unit of code designed specifically to operate upon specific `Eventable` types containing information useful to its operation(s)
  */
 open class EventListener: EventHandler, EventListenable {
+    public var maximumEventAge: UInt64 = 0
+    
     public var interestedIn: EventListenerInterest = .all
     
     /**
@@ -31,6 +33,7 @@ open class EventListener: EventHandler, EventListenable {
         var dispatchQueue: DispatchQueue?
         var executeOn: ExecuteEventOn = .requesterThread
         var interestedIn: EventListenerInterest = .all
+        var maximumEventAge: UInt64 = 0
     }
     
     /**
@@ -68,6 +71,8 @@ open class EventListener: EventHandler, EventListenable {
             
             if listener.interestedIn == .latestOnly && event.dispatchTime < latestEventDispatchTime[event.event.getEventTypeName()]! { continue } // If this Listener is only interested in the Latest Event dispatched for this Event Type, and this Event is NOT the Latest... skip it!
             
+            if listener.interestedIn == .youngerThan && listener.maximumEventAge != 0 && (DispatchTime.now().uptimeNanoseconds - event.dispatchTime.uptimeNanoseconds) > listener.maximumEventAge { continue } // If this Receiver has a maximum age of interest, and this Event is older than that... skip it!
+            
             switch listener.executeOn {
             case .requesterThread:
                 Task { // We raise a Task because we don't want the entire Listener blocked in the event the dispatchQueue is busy or blocked!
@@ -86,12 +91,12 @@ open class EventListener: EventHandler, EventListenable {
         }
     }
     
-    @discardableResult public func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn = .requesterThread, interestedIn: EventListenerInterest = .all) -> EventListenerHandling {
+    @discardableResult public func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn = .requesterThread, interestedIn: EventListenerInterest = .all, maximumAge: UInt64 = 0) -> EventListenerHandling {
         let eventTypeName = forEventType.getEventTypeName()
         let method: EventCallback = { event, priority, dispatchTime in
             self.callTypedEventCallback(callback, forEvent: event, priority: priority, dispatchTime: dispatchTime)
         }
-        let eventListenerContainer = EventListenerContainer(requester: requester, callback: method, dispatchQueue: OperationQueue.current?.underlyingQueue, executeOn: executeOn, interestedIn: interestedIn)
+        let eventListenerContainer = EventListenerContainer(requester: requester, callback: method, dispatchQueue: OperationQueue.current?.underlyingQueue, executeOn: executeOn, interestedIn: interestedIn, maximumEventAge: maximumAge)
         _eventListeners.withLock { eventCallbacks in
             var bucket = eventCallbacks[eventTypeName]
             if bucket == nil { bucket = [EventListenerContainer]() } // Create a new bucket if there isn't already one!
