@@ -18,11 +18,11 @@ final class BasicEventSchedulingTests: XCTestCase {
     private var exp: XCTestExpectation? = nil
     private var executed: DispatchTime? = nil
     
-    func testPerformanceExample() throws {
+    func testScheduling() throws {
         TestEvent.addListener(self, { (event: TestEvent, priority, dispatchTime) in
-            print("TestEvent where foo = \(event.foo)")
             self.testValue = event.foo
             self.executed = DispatchTime.now()
+            print("TestEvent where foo = \(event.foo), dispatched at \(dispatchTime)ns, executed at \(self.executed!)ns... Delta is \(DispatchTime(uptimeNanoseconds: self.executed!.uptimeNanoseconds - dispatchTime.uptimeNanoseconds))ns")
             self.exp?.fulfill()
         }, executeOn: .taskThread)
         
@@ -40,7 +40,7 @@ final class BasicEventSchedulingTests: XCTestCase {
         XCTAssertNotNil(executed)
         if executed != nil {
             XCTAssertLessThan(scheduledFor, executed!)
-            XCTAssertLessThan(executed!, scheduledFor + TimeInterval().advanced(by: 4.001))
+            XCTAssertLessThan(executed!, scheduledFor + TimeInterval().advanced(by: 4.00001))
         }
     }
 
