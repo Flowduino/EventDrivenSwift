@@ -53,15 +53,17 @@ public protocol EventListenable: AnyObject, EventReceiving {
     /**
      Registers an Event Callback for the given `Eventable` Type
      - Author: Simon J. Stuart
-     - Version: 3.0.0
+     - Version: 5.1.0
      - Parameters:
         - requester: The Object owning the Callback Method
         - callback: The code to invoke for the given `Eventable` Type
         - forEventType: The `Eventable` Type for which to Register  the Callback
         - executeOn: Tells the `EventListenable` whether to execute the Callback on the `requester`'s Thread, or the Listener's.
+        - interestedIn: Defines the conditions under which the Listener is interested in an Event (anything outside of the given condition will be ignored by this Listener)
+        - maximumAge: If `interestedIn` == `.youngerThan`, this is the number of nanoseconds between the time of dispatch and the moment of processing where the Listener will be interested in the Event. Any Event older will be ignored
      - Returns: A `UUID` value representing the `token` associated with this Event Callback
      */
-    @discardableResult func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn, interestedIn: EventListenerInterest) -> EventListenerHandling
+    @discardableResult func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn, interestedIn: EventListenerInterest, maximumAge: UInt64) -> EventListenerHandling
     
     /**
      Locates and removes the given Listener `token` (if it exists)

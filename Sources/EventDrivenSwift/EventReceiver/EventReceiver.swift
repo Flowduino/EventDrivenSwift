@@ -20,5 +20,7 @@ import Observable
  - Note: `EventThread` inherits from this
  */
 open class EventReceiver: EventHandler, EventReceiving {
+    public var maximumEventAge: UInt64 = 0
+    
     public var interestedIn: EventListenerInterest = .all
 }

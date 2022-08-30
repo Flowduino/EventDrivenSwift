@@ -20,4 +20,11 @@ public protocol EventReceiving: AnyObject, EventHandling {
      - Version: 4.3.0
      */
     var interestedIn: EventListenerInterest { get set }
+    
+    /**
+     Declares the maximum age of an `Eventable` before it will be ignored if `interestedIn` == `.youngerThan`
+     - Author: Simon J. Stuart
+     - Version: 5.1.0
+     */
+    var maximumEventAge: UInt64 { get set }
 }

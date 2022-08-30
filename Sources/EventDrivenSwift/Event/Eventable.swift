@@ -63,7 +63,7 @@ public protocol Eventable {
         - callback: The code to invoke for the given `Eventable` Type
      - Returns: A `UUID` value representing the `token` associated with this Event Callback
      */
-    @discardableResult static func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, executeOn: ExecuteEventOn, interestedIn: EventListenerInterest) -> EventListenerHandling
+    @discardableResult static func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, executeOn: ExecuteEventOn, interestedIn: EventListenerInterest, maximumAge: UInt64) -> EventListenerHandling
     
     /**
      Locates and removes the given Listener `token` (if it exists) from the Central Event Listener
@@ -122,8 +122,8 @@ extension Eventable {
         EventCentral.scheduleStack(self, at: at, priority: priority)
     }
     
-    @discardableResult static public func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, executeOn: ExecuteEventOn = .requesterThread, interestedIn: EventListenerInterest = .all) -> EventListenerHandling {
-        return EventCentral.addListener(requester, callback, forEventType: Self.self, executeOn: executeOn, interestedIn: interestedIn)
+    @discardableResult static public func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, executeOn: ExecuteEventOn = .requesterThread, interestedIn: EventListenerInterest = .all, maximumAge: UInt64 = 0) -> EventListenerHandling {
+        return EventCentral.addListener(requester, callback, forEventType: Self.self, executeOn: executeOn, interestedIn: interestedIn, maximumAge: maximumAge)
     }
        
     public static func removeListener(_ token: UUID) {

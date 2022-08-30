@@ -10,7 +10,7 @@ import ThreadSafeSwift
 @testable import EventDrivenSwift
 
 final class BasicEventListenerTests: XCTestCase, EventListening {
-    struct TestEventTypeOne: Eventable {
+    struct TestEventTypeOne: Eventable {        
         var foo: Int
     }
     
