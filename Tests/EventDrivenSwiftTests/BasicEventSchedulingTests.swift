@@ -22,7 +22,7 @@ final class BasicEventSchedulingTests: XCTestCase {
         TestEvent.addListener(self, { (event: TestEvent, priority, dispatchTime) in
             self.testValue = event.foo
             self.executed = DispatchTime.now()
-            print("TestEvent where foo = \(event.foo), dispatched at \(dispatchTime)ns, executed at \(self.executed!)ns... Delta is \(DispatchTime(uptimeNanoseconds: self.executed!.uptimeNanoseconds - dispatchTime.uptimeNanoseconds))ns")
+            print("TestEvent where foo = \(event.foo), dispatched at \(dispatchTime.uptimeNanoseconds)ns, executed at \(self.executed!.uptimeNanoseconds)ns... Delta is \(DispatchTime(uptimeNanoseconds: self.executed!.uptimeNanoseconds - dispatchTime.uptimeNanoseconds).uptimeNanoseconds)ns")
             self.exp?.fulfill()
         }, executeOn: .taskThread)
         
