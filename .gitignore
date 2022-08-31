@@ -91,3 +91,5 @@ iOSInjectionProject/
 
 # MacOS FileSystem
 *.DS_Store
+.dependencies
+.derivedData
