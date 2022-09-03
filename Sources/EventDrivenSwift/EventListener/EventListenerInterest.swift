@@ -25,4 +25,13 @@ public enum EventListenerInterest: CaseIterable {
      - Version: 5.0.0
      */
     case youngerThan
+    
+    /**
+     Receivers will ignore any Event where the Filter Callback returns `false`, and accept any Event where the Filter Callback returns `true`
+     - Author: Simon J. Stuart
+     - Version: 5.2.0
+     */
+    case custom
 }
+
+public typealias TypedEventFilterCallback<EventType: Eventable> = (_ event: EventType, _ priority: EventPriority, _ dispatchTime: DispatchTime) -> Bool

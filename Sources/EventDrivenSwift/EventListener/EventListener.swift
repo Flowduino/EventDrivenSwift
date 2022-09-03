@@ -34,6 +34,7 @@ open class EventListener: EventHandler, EventListenable {
         var executeOn: ExecuteEventOn = .requesterThread
         var interestedIn: EventListenerInterest = .all
         var maximumEventAge: UInt64 = 0
+        var customFilter: EventFilterCallback?
     }
     
     /**
@@ -73,6 +74,8 @@ open class EventListener: EventHandler, EventListenable {
             
             if listener.interestedIn == .youngerThan && listener.maximumEventAge != 0 && (DispatchTime.now().uptimeNanoseconds - event.dispatchTime.uptimeNanoseconds) > listener.maximumEventAge { continue } // If this Receiver has a maximum age of interest, and this Event is older than that... skip it!
             
+            if listener.interestedIn == .custom && (listener.customFilter == nil || !listener.customFilter!(event.event, priority, event.dispatchTime)) { continue }
+            
             switch listener.executeOn {
             case .requesterThread:
                 Task { // We raise a Task because we don't want the entire Listener blocked in the event the dispatchQueue is busy or blocked!
@@ -91,12 +94,18 @@ open class EventListener: EventHandler, EventListenable {
         }
     }
     
-    @discardableResult public func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn = .requesterThread, interestedIn: EventListenerInterest = .all, maximumAge: UInt64 = 0) -> EventListenerHandling {
+    @discardableResult public func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn = .requesterThread, interestedIn: EventListenerInterest = .all, maximumAge: UInt64 = 0, customFilter: TypedEventFilterCallback<TEvent>? = nil) -> EventListenerHandling {
         let eventTypeName = forEventType.getEventTypeName()
         let method: EventCallback = { event, priority, dispatchTime in
             self.callTypedEventCallback(callback, forEvent: event, priority: priority, dispatchTime: dispatchTime)
         }
-        let eventListenerContainer = EventListenerContainer(requester: requester, callback: method, dispatchQueue: OperationQueue.current?.underlyingQueue, executeOn: executeOn, interestedIn: interestedIn, maximumEventAge: maximumAge)
+        var filterMethod: EventFilterCallback? = nil
+        if customFilter != nil {
+            filterMethod = { event, priority, dispatchTime in
+                self.callTypedEventFilterCallback(customFilter!, forEvent: event, priority: priority, dispatchTime: dispatchTime)
+            }
+        }
+        let eventListenerContainer = EventListenerContainer(requester: requester, callback: method, dispatchQueue: OperationQueue.current?.underlyingQueue, executeOn: executeOn, interestedIn: interestedIn, maximumEventAge: maximumAge, customFilter: filterMethod)
         _eventListeners.withLock { eventCallbacks in
             var bucket = eventCallbacks[eventTypeName]
             if bucket == nil { bucket = [EventListenerContainer]() } // Create a new bucket if there isn't already one!
@@ -161,10 +170,28 @@ open class EventListener: EventHandler, EventListenable {
         - callback: The code (Closure or Callback Method) to execute for the given `forEvent`, typed generically using `TEvent`
         - forEvent: The instance of the `Eventable` type to be processed
         - priority: The `EventPriority` with which the `forEvent` was dispatched
+        - dispatchTime: The `DispatchTime` at which `forEvent` was Dispatched
      */
     internal func callTypedEventCallback<TEvent: Eventable>(_ callback: @escaping TypedEventCallback<TEvent>, forEvent: Eventable, priority: EventPriority, dispatchTime: DispatchTime) {
         if let typedEvent = forEvent as? TEvent {
             callback(typedEvent, priority, dispatchTime)
         }
+    }
+    
+    /**
+     Performs a Transparent Type Test, Type Cast, and Method Call to the Custom Filter via a `callback` Closure.
+     - Author: Simon J. Stuart
+     - Version: 5.2.0
+     - Parameters:
+        - callback: The code (Closure or Callback Method) to execute for the given `forEvent`, typed generically using `TEvent`... returns `true` if the Listener is interested in `forEvent`, `false` if the Listener wants to ignore it
+        - forEvent: The instance of the `Eventable` type to be processed
+        - priority: The `EventPriority` with which the `forEvent` was dispatched
+        - dispatchTime: The `DispatchTime` at which `forEvent` was Dispatched
+     */
+    internal func callTypedEventFilterCallback<TEvent: Eventable>(_ callback: @escaping TypedEventFilterCallback<TEvent>, forEvent: Eventable, priority: EventPriority, dispatchTime: DispatchTime) -> Bool {
+        if let typedEvent = forEvent as? TEvent {
+            return callback(typedEvent, priority, dispatchTime)
+        }
+        return false /// We will simply return `false` if the Event is of the wrong Type
     }
 }
