@@ -14,6 +14,7 @@ import Foundation
  - Version: 3.0.0
  */
 public typealias EventCallback = (_ event: any Eventable, _ priority: EventPriority, _ dispatchTime: DispatchTime) -> ()
+public typealias EventFilterCallback = (_ event: any Eventable, _ priority: EventPriority, _ dispatchTime: DispatchTime) -> Bool
 
 /**
  Convienience `typealias` used for Typed Event Callbacks
@@ -63,7 +64,7 @@ public protocol EventListenable: AnyObject, EventReceiving {
         - maximumAge: If `interestedIn` == `.youngerThan`, this is the number of nanoseconds between the time of dispatch and the moment of processing where the Listener will be interested in the Event. Any Event older will be ignored
      - Returns: A `UUID` value representing the `token` associated with this Event Callback
      */
-    @discardableResult func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn, interestedIn: EventListenerInterest, maximumAge: UInt64) -> EventListenerHandling
+    @discardableResult func addListener<TEvent: Eventable>(_ requester: AnyObject?, _ callback: @escaping TypedEventCallback<TEvent>, forEventType: Eventable.Type, executeOn: ExecuteEventOn, interestedIn: EventListenerInterest, maximumAge: UInt64, customFilter: TypedEventFilterCallback<TEvent>?) -> EventListenerHandling
     
     /**
      Locates and removes the given Listener `token` (if it exists)

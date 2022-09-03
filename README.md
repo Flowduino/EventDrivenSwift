@@ -477,6 +477,37 @@ In the above code example, `maximumAge` is a value defined in *nanoseconds*. Wit
 
 This functionality is very useful when the context of an *Event*'s usage would have a known, fixed expiry.
 
+## `EventListener` with *Custom Event Filtering* Interest
+Version 5.2.0 of this library introduces the concept of *Custom Event Filtering* for *Listeners*.
+
+Now, when registering a *Listener* for an `Eventable` type, you can specify a `customFilter` *Callback* which, ultimately, returns a `Bool` where `true` means that the *Listener* is interested in the *Event*, and `false` means that the *Listener* is **not** interested in the *Event*.
+
+We have made it simple for you to configure a *Custom Filter* for your *Listener*. Taking the previous code example, we can simply modify it as follows:
+```swift
+class TemperatureRatingViewModel: ObservableObject {
+    @Published var temperatureInCelsius: Float
+    @Published var temperatureRating: TemperatureRating
+    
+    var listenerHandle: EventListenerHandling?
+    
+    internal func onTemperatureRatingEvent(_ event: TemperatureRatingEvent, _ priority: EventPriority, _ dispatchTime: DispatchTime) {
+        temperatureInCelsius = event.temperatureInCelsius
+        temperatureRating = event.temperatureRating
+    }
+    
+    internal func onTemperatureRatingEventFilter(_ event: TemperatureRatingEvent, _ priority: EventPriority, _ dispatchTime: DispatchTime) -> Bool {
+        if event.temperatureInCelsius > 50 { return false } // If the Temperature is above 50 Degrees, this Listener is not interested in it!
+        return true // If the Temperature is NOT above 50 Degrees, the Listener IS interested in it!
+    }
+    
+    init() {
+        // Let's register our Event Listener Callback!
+        listenerHandle = TemperatureRatingEvent.addListener(self, onTemperatureRatingEvent, interestedIn: .custom, customFilter: onTemperatureRatingEventFilter)
+    }
+}
+```
+The above code will ensure that the `onTemperatureRatingEvent` method is only invoked for a `TemperatureRatingEvent` where its `temperatureInCelsius` is less than or equal to 50 Degrees Celsius. Any `TemperatureRatingEvent` with a `temperatureInCelsius` greater than 50 will simply be ignored by this *Listener*. 
+
 ## `EventPool`
 Version 4.0.0 introduces the extremely powerful `EventPool` solution, making it possible to create managed groups of `EventThread`s, where inbound *Events* will be directed to the best `EventThread` in the `EventPool` at any given moment.
 

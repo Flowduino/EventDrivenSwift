@@ -54,7 +54,7 @@ open class EventDispatcher: EventHandler, EventDispatching {
         
         _receivers.withLock { receivers in
             var bucket = receivers[eventTypeName]
-            if bucket == nil { return } /// Can't remove a Receiver if there isn't even a Bucket for hte Event Type
+            if bucket == nil { return } /// Can't remove a Receiver if there isn't even a Bucket for the Event Type
             
             /// Remove any Receivers from this Event-Type Bucket for the given `receiver` instance.
             bucket!.removeAll { receiverContainer in

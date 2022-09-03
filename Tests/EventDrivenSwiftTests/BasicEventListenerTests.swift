@@ -37,6 +37,7 @@ final class BasicEventListenerTests: XCTestCase, EventListening {
     var myFoo = 0
     var listenerHandler: EventListenerHandling? = nil
     let testOne = TestEventTypeOne(foo: 1000) // Create the Event
+    let testZero = TestEventTypeOne(foo: 2000) // Create the Event
     var awaiter = DispatchSemaphore(value: 0)
        
     func testEventListenerOnListenerThread() throws {
@@ -69,6 +70,31 @@ final class BasicEventListenerTests: XCTestCase, EventListening {
         }, executeOn: .taskThread)
         
         testOne.queue()
+        
+        let result = awaiter.wait(timeout: DispatchTime.now().advanced(by: DispatchTimeInterval.seconds(10)))
+        XCTAssertEqual(result, .success, "The Event Handler was not invoked in time!")
+        XCTAssertEqual(self.myFoo, testOne.foo, "Expect new value of eventThread.foo to be \(testOne.foo), but it's \(self.myFoo)")
+        
+        listenerHandler?.remove()
+    }
+    
+    func testEventListenerCustomFilter() throws {
+        XCTAssertEqual(myFoo, 0, "Expect initial value of eventThread.foo to be 0, but it's \(myFoo)")
+        
+        listenerHandler = TestEventTypeOne.addListener(self, { (event: TestEventTypeOne, priority, dispatchTime) in
+            self.myFoo = event.foo
+            self.awaiter.signal()
+        }, executeOn: .taskThread, interestedIn: .custom, customFilter: { (event: TestEventTypeOne, priority, dispatchTime) in
+            if event.foo == 1000 {
+                print("Accepting Event because foo = 1000")
+                return true
+            }
+            print("Ignoring Event where foo = \(event.foo)")
+            return false
+        })
+        
+        testOne.queue()
+        testZero.queue()
         
         let result = awaiter.wait(timeout: DispatchTime.now().advanced(by: DispatchTimeInterval.seconds(10)))
         XCTAssertEqual(result, .success, "The Event Handler was not invoked in time!")
